@@ -1,0 +1,25 @@
+[Unit]
+Description=ABWTorrent ISO Watchdog
+Documentation=https://github.com/abw/abwtorrent
+After=network-online.target transmission-daemon.service remote-fs.target
+Wants=network-online.target
+Requires=transmission-daemon.service
+
+[Service]
+Type=simple
+User=debian-transmission
+Group=debian-transmission
+ExecStart=/opt/abwtorrent/venv/bin/python3 /opt/abwtorrent/watchdog_service.py --config /etc/abwtorrent/abwtorrent.conf
+Restart=on-failure
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=abwtorrent-watchdog
+
+# Security hardening
+NoNewPrivileges=true
+ProtectSystem=strict
+ReadWritePaths=/media/nas /var/log/abwtorrent /etc/abwtorrent
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,254 @@
+{% extends "base.html" %}
+{% block title %}Settings — ABWTorrent{% endblock %}
+
+{% block body %}
+<div class="app-layout">
+  <!-- Sidebar (same as dashboard) -->
+  <nav class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <svg width="32" height="32" viewBox="0 0 48 48" fill="none">
+        <rect width="48" height="48" rx="12" fill="url(#gs2)"/>
+        <path d="M14 24l6 6 14-14" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+        <defs><linearGradient id="gs2" x1="0" y1="0" x2="48" y2="48"><stop stop-color="#6366f1"/><stop offset="1" stop-color="#8b5cf6"/></linearGradient></defs>
+      </svg>
+      <span>ABWTorrent</span>
+    </div>
+    <ul class="nav-links">
+      <li><a href="{{ url_for('dashboard') }}" id="nav-dashboard-s">
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Dashboard
+      </a></li>
+      <li><a href="{{ url_for('settings') }}" class="active" id="nav-settings-s">
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+        Settings
+      </a></li>
+    </ul>
+    <div class="sidebar-footer">
+      <span class="user-badge">{{ user }}</span>
+      <a href="{{ url_for('logout') }}" class="logout-link" id="logout-link-s">Sign out</a>
+    </div>
+  </nav>
+
+  <!-- Main -->
+  <main class="main-content">
+    <header class="page-header">
+      <h1>Settings</h1>
+      <p class="page-subtitle">Configure ABWTorrent watchdog and Transmission</p>
+    </header>
+
+    <div class="settings-grid">
+      <!-- General Settings -->
+      <section class="card" id="general-settings-card">
+        <div class="card-header"><h2>General</h2></div>
+        <div class="card-body">
+          <form id="settings-form">
+            <div class="form-group">
+              <label for="s-watch-dir">Watch Directory</label>
+              <input type="text" id="s-watch-dir" name="watch_dir" value="{{ config.get('watch_dir','') }}">
+            </div>
+            <div class="form-group">
+              <label for="s-output-dir">Torrent Output Directory</label>
+              <input type="text" id="s-output-dir" name="torrent_output_dir" value="{{ config.get('torrent_output_dir','') }}">
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="s-piece-size">Piece Size (bytes)</label>
+                <select id="s-piece-size" name="torrent.piece_size">
+                  <option value="1048576"  {{ 'selected' if config.get('torrent',{}).get('piece_size')==1048576 }}>1 MiB</option>
+                  <option value="2097152"  {{ 'selected' if config.get('torrent',{}).get('piece_size')==2097152 }}>2 MiB</option>
+                  <option value="4194304"  {{ 'selected' if config.get('torrent',{}).get('piece_size')==4194304 }}>4 MiB</option>
+                  <option value="8388608"  {{ 'selected' if config.get('torrent',{}).get('piece_size')==8388608 }}>8 MiB</option>
+                  <option value="16777216" {{ 'selected' if config.get('torrent',{}).get('piece_size')==16777216 }}>16 MiB</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="s-log-level">Log Level</label>
+                <select id="s-log-level" name="log.level">
+                  {% for lvl in ['DEBUG','INFO','WARNING','ERROR'] %}
+                  <option value="{{ lvl }}" {{ 'selected' if config.get('log',{}).get('level')==lvl }}>{{ lvl }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="s-comment">Torrent Comment</label>
+              <input type="text" id="s-comment" name="torrent.comment" value="{{ config.get('torrent',{}).get('comment','') }}">
+            </div>
+            <button type="submit" class="btn btn-primary" id="save-settings-btn">Save Settings</button>
+          </form>
+        </div>
+      </section>
+
+      <!-- Transmission Settings -->
+      <section class="card" id="transmission-settings-card">
+        <div class="card-header"><h2>Transmission Connection</h2></div>
+        <div class="card-body">
+          <form id="transmission-form">
+            <div class="form-row">
+              <div class="form-group">
+                <label for="s-tr-host">Host</label>
+                <input type="text" id="s-tr-host" name="transmission.host" value="{{ config.get('transmission',{}).get('host','') }}">
+              </div>
+              <div class="form-group">
+                <label for="s-tr-port">Port</label>
+                <input type="number" id="s-tr-port" name="transmission.port" value="{{ config.get('transmission',{}).get('port','') }}">
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="s-tr-user">Username</label>
+                <input type="text" id="s-tr-user" name="transmission.username" value="{{ config.get('transmission',{}).get('username','') }}">
+              </div>
+              <div class="form-group">
+                <label for="s-tr-pass">Password</label>
+                <input type="password" id="s-tr-pass" name="transmission.password" value="{{ config.get('transmission',{}).get('password','') }}">
+              </div>
+            </div>
+            <button type="submit" class="btn btn-primary" id="save-transmission-btn">Save Connection</button>
+          </form>
+        </div>
+      </section>
+
+      <!-- Change Password -->
+      <section class="card" id="password-card">
+        <div class="card-header"><h2>Change Your Password</h2></div>
+        <div class="card-body">
+          <form id="password-form">
+            <div class="form-group">
+              <label for="pw-current">Current Password</label>
+              <input type="password" id="pw-current" required>
+            </div>
+            <div class="form-group">
+              <label for="pw-new">New Password</label>
+              <input type="password" id="pw-new" required minlength="4">
+            </div>
+            <div class="form-group">
+              <label for="pw-confirm">Confirm New Password</label>
+              <input type="password" id="pw-confirm" required minlength="4">
+            </div>
+            <button type="submit" class="btn btn-primary" id="change-password-btn">Update Password</button>
+          </form>
+        </div>
+      </section>
+
+      <!-- User Management -->
+      <section class="card" id="user-management-card">
+        <div class="card-header"><h2>User Management</h2></div>
+        <div class="card-body">
+          <div id="user-list" class="user-list"></div>
+          <hr class="divider">
+          <h3 class="section-title">Add User</h3>
+          <form id="add-user-form">
+            <div class="form-row">
+              <div class="form-group">
+                <label for="new-user-name">Username</label>
+                <input type="text" id="new-user-name" required>
+              </div>
+              <div class="form-group">
+                <label for="new-user-pass">Password</label>
+                <input type="password" id="new-user-pass" required>
+              </div>
+              <div class="form-group">
+                <label for="new-user-role">Role</label>
+                <select id="new-user-role">
+                  <option value="admin">Admin</option>
+                  <option value="viewer">Viewer</option>
+                </select>
+              </div>
+            </div>
+            <button type="submit" class="btn btn-secondary" id="add-user-btn">Add User</button>
+          </form>
+        </div>
+      </section>
+    </div>
+  </main>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  // ── Settings form ─────────────────────────────
+  document.getElementById('settings-form').addEventListener('submit', async e => {
+    e.preventDefault();
+    const fd = new FormData(e.target);
+    const data = Object.fromEntries(fd.entries());
+    const res = await fetch('/api/settings', {
+      method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(data)
+    });
+    const j = await res.json();
+    showToast(j.message || 'Saved', j.ok ? 'success' : 'error');
+  });
+
+  // ── Transmission form ─────────────────────────
+  document.getElementById('transmission-form').addEventListener('submit', async e => {
+    e.preventDefault();
+    const fd = new FormData(e.target);
+    const data = Object.fromEntries(fd.entries());
+    const res = await fetch('/api/settings', {
+      method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(data)
+    });
+    const j = await res.json();
+    showToast(j.message || 'Saved', j.ok ? 'success' : 'error');
+  });
+
+  // ── Change password ───────────────────────────
+  document.getElementById('password-form').addEventListener('submit', async e => {
+    e.preventDefault();
+    const cur  = document.getElementById('pw-current').value;
+    const npw  = document.getElementById('pw-new').value;
+    const conf = document.getElementById('pw-confirm').value;
+    if (npw !== conf) { showToast('Passwords do not match.', 'error'); return; }
+    const res = await fetch('/api/change-password', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({current_password: cur, new_password: npw})
+    });
+    const j = await res.json();
+    showToast(j.message, j.ok ? 'success' : 'error');
+    if (j.ok) e.target.reset();
+  });
+
+  // ── User management ───────────────────────────
+  async function loadUsers() {
+    const res = await fetch('/api/users');
+    const j = await res.json();
+    const list = document.getElementById('user-list');
+    list.innerHTML = j.users.map(u => `
+      <div class="user-row">
+        <span class="user-name">${u.username}</span>
+        <span class="user-role-badge role-${u.role}">${u.role}</span>
+        <button class="btn btn-danger btn-sm" onclick="deleteUser('${u.username}')">Remove</button>
+      </div>
+    `).join('');
+  }
+
+  window.deleteUser = async function(username) {
+    if (!confirm('Delete user ' + username + '?')) return;
+    const res = await fetch('/api/delete-user', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({username})
+    });
+    const j = await res.json();
+    showToast(j.message, j.ok ? 'success' : 'error');
+    if (j.ok) loadUsers();
+  };
+
+  document.getElementById('add-user-form').addEventListener('submit', async e => {
+    e.preventDefault();
+    const username = document.getElementById('new-user-name').value;
+    const password = document.getElementById('new-user-pass').value;
+    const role     = document.getElementById('new-user-role').value;
+    const res = await fetch('/api/add-user', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({username, password, role})
+    });
+    const j = await res.json();
+    showToast(j.message, j.ok ? 'success' : 'error');
+    if (j.ok) { e.target.reset(); loadUsers(); }
+  });
+
+  loadUsers();
+});
+</script>
+{% endblock %}

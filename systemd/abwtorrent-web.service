@@ -1,0 +1,25 @@
+[Unit]
+Description=ABWTorrent Web UI
+Documentation=https://github.com/abw/abwtorrent
+After=network-online.target transmission-daemon.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=debian-transmission
+Group=debian-transmission
+Environment=ABWTORRENT_CONFIG=/etc/abwtorrent/abwtorrent.conf
+ExecStart=/opt/abwtorrent/venv/bin/python3 /opt/abwtorrent/web_ui.py --config /etc/abwtorrent/abwtorrent.conf
+Restart=on-failure
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=abwtorrent-web
+
+# Security hardening
+NoNewPrivileges=true
+ProtectSystem=strict
+ReadWritePaths=/media/nas /var/log/abwtorrent /etc/abwtorrent
+
+[Install]
+WantedBy=multi-user.target
