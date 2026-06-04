@@ -1,6 +1,6 @@
 # ABWTorrent
 
-**Internal LAN-only automated ISO seeding via BitTorrent.**
+**Internal LAN-only automated ISO seeding via BitTorrent with KI, AI and API and hashing so it's secure.**
 
 ABWTorrent watches a NAS directory for Debian ISO files, automatically generates `.torrent` files, and injects them into Transmission for peer-to-peer distribution across your local network. No trackers, no internet exposure — peers discover each other via **Local Peer Discovery (LPD)** multicast.
 
