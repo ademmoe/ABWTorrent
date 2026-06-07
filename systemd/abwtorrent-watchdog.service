@@ -16,10 +16,5 @@ StandardOutput=journal
 StandardError=journal
 SyslogIdentifier=abwtorrent-watchdog
 
-# Security hardening
-NoNewPrivileges=true
-ProtectSystem=strict
-ReadWritePaths=/media/nas /var/log/abwtorrent /etc/abwtorrent
-
 [Install]
 WantedBy=multi-user.target

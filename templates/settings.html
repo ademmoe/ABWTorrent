@@ -1,175 +1,188 @@
 {% extends "base.html" %}
 {% block title %}Settings — ABWTorrent{% endblock %}
+{% block body_class %}has-sidebar{% endblock %}
 
 {% block body %}
-<div class="app-layout">
-  <!-- Sidebar (same as dashboard) -->
-  <nav class="sidebar" id="sidebar">
-    <div class="sidebar-brand">
-      <svg width="32" height="32" viewBox="0 0 48 48" fill="none">
-        <rect width="48" height="48" rx="12" fill="url(#gs2)"/>
-        <path d="M14 24l6 6 14-14" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-        <defs><linearGradient id="gs2" x1="0" y1="0" x2="48" y2="48"><stop stop-color="#6366f1"/><stop offset="1" stop-color="#8b5cf6"/></linearGradient></defs>
-      </svg>
-      <span>ABWTorrent</span>
-    </div>
-    <ul class="nav-links">
-      <li><a href="{{ url_for('dashboard') }}" id="nav-dashboard-s">
-        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-        Dashboard
-      </a></li>
-      <li><a href="{{ url_for('settings') }}" class="active" id="nav-settings-s">
-        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
-        Settings
-      </a></li>
-    </ul>
-    <div class="sidebar-footer">
-      <span class="user-badge">{{ user }}</span>
-      <a href="{{ url_for('logout') }}" class="logout-link" id="logout-link-s">Sign out</a>
+<!-- Navbar for mobile -->
+<header>
+  <nav class="indigo top-nav hide-on-large-only">
+    <div class="nav-wrapper">
+      <a href="#" data-target="slide-out" class="sidenav-trigger"><i class="material-icons">menu</i></a>
+      <a href="#!" class="brand-logo">Settings</a>
     </div>
   </nav>
+</header>
 
-  <!-- Main -->
-  <main class="main-content">
-    <header class="page-header">
-      <h1>Settings</h1>
-      <p class="page-subtitle">Configure ABWTorrent watchdog and Transmission</p>
-    </header>
+<!-- Sidebar -->
+<ul id="slide-out" class="sidenav sidenav-fixed">
+  <li><div class="user-view">
+    <div class="background indigo"></div>
+    <a href="#!"><i class="material-icons large white-text">cloud_download</i></a>
+    <a href="#!"><span class="white-text name">ABWTorrent</span></a>
+    <a href="#!"><span class="white-text email">Role: {{ user }}</span></a>
+  </div></li>
+  <li><a href="{{ url_for('dashboard') }}" class="waves-effect"><i class="material-icons">dashboard</i>Dashboard</a></li>
+  <li class="active"><a href="{{ url_for('settings') }}" class="waves-effect"><i class="material-icons">settings</i>Settings</a></li>
+  <li><div class="divider"></div></li>
+  <li><a href="{{ url_for('logout') }}" class="waves-effect"><i class="material-icons">exit_to_app</i>Sign out</a></li>
+</ul>
 
-    <div class="settings-grid">
-      <!-- General Settings -->
-      <section class="card" id="general-settings-card">
-        <div class="card-header"><h2>General</h2></div>
-        <div class="card-body">
+<!-- Main Content -->
+<main style="padding: 2rem;">
+  <h4>Settings</h4>
+  <p class="grey-text">Configure ABWTorrent watchdog and Transmission</p>
+
+  <div class="row">
+    <!-- General Settings -->
+    <div class="col s12 xl6">
+      <div class="card">
+        <div class="card-content">
+          <span class="card-title">General</span>
           <form id="settings-form">
-            <div class="form-group">
-              <label for="s-watch-dir">Watch Directory</label>
+            <div class="input-field">
               <input type="text" id="s-watch-dir" name="watch_dir" value="{{ config.get('watch_dir','') }}">
+              <label for="s-watch-dir">Watch Directory</label>
             </div>
-            <div class="form-group">
-              <label for="s-output-dir">Torrent Output Directory</label>
+            <div class="input-field">
               <input type="text" id="s-output-dir" name="torrent_output_dir" value="{{ config.get('torrent_output_dir','') }}">
+              <label for="s-output-dir">Torrent Output Directory</label>
             </div>
-            <div class="form-row">
-              <div class="form-group">
-                <label for="s-piece-size">Piece Size (bytes)</label>
+            <div class="row">
+              <div class="input-field col s6">
                 <select id="s-piece-size" name="torrent.piece_size">
-                  <option value="1048576"  {{ 'selected' if config.get('torrent',{}).get('piece_size')==1048576 }}>1 MiB</option>
-                  <option value="2097152"  {{ 'selected' if config.get('torrent',{}).get('piece_size')==2097152 }}>2 MiB</option>
-                  <option value="4194304"  {{ 'selected' if config.get('torrent',{}).get('piece_size')==4194304 }}>4 MiB</option>
-                  <option value="8388608"  {{ 'selected' if config.get('torrent',{}).get('piece_size')==8388608 }}>8 MiB</option>
-                  <option value="16777216" {{ 'selected' if config.get('torrent',{}).get('piece_size')==16777216 }}>16 MiB</option>
+                  <option value="1048576"  {{ 'selected' if config.get('torrent',{}).get('piece_size')==1048576 else '' }}>1 MiB</option>
+                  <option value="2097152"  {{ 'selected' if config.get('torrent',{}).get('piece_size')==2097152 else '' }}>2 MiB</option>
+                  <option value="4194304"  {{ 'selected' if config.get('torrent',{}).get('piece_size')==4194304 else '' }}>4 MiB</option>
+                  <option value="8388608"  {{ 'selected' if config.get('torrent',{}).get('piece_size')==8388608 else '' }}>8 MiB</option>
+                  <option value="16777216" {{ 'selected' if config.get('torrent',{}).get('piece_size')==16777216 else '' }}>16 MiB</option>
                 </select>
+                <label>Piece Size (bytes)</label>
               </div>
-              <div class="form-group">
-                <label for="s-log-level">Log Level</label>
+              <div class="input-field col s6">
                 <select id="s-log-level" name="log.level">
                   {% for lvl in ['DEBUG','INFO','WARNING','ERROR'] %}
-                  <option value="{{ lvl }}" {{ 'selected' if config.get('log',{}).get('level')==lvl }}>{{ lvl }}</option>
+                  <option value="{{ lvl }}" {{ 'selected' if config.get('log',{}).get('level')==lvl else '' }}>{{ lvl }}</option>
                   {% endfor %}
                 </select>
+                <label>Log Level</label>
               </div>
             </div>
-            <div class="form-group">
-              <label for="s-comment">Torrent Comment</label>
+            <div class="input-field">
               <input type="text" id="s-comment" name="torrent.comment" value="{{ config.get('torrent',{}).get('comment','') }}">
+              <label for="s-comment">Torrent Comment</label>
             </div>
-            <button type="submit" class="btn btn-primary" id="save-settings-btn">Save Settings</button>
+            <button type="submit" class="btn waves-effect waves-light indigo">Save Settings</button>
           </form>
         </div>
-      </section>
+      </div>
+    </div>
 
-      <!-- Transmission Settings -->
-      <section class="card" id="transmission-settings-card">
-        <div class="card-header"><h2>Transmission Connection</h2></div>
-        <div class="card-body">
+    <!-- Transmission Settings -->
+    <div class="col s12 xl6">
+      <div class="card">
+        <div class="card-content">
+          <span class="card-title">Transmission Connection</span>
           <form id="transmission-form">
-            <div class="form-row">
-              <div class="form-group">
-                <label for="s-tr-host">Host</label>
+            <div class="row">
+              <div class="input-field col s8">
                 <input type="text" id="s-tr-host" name="transmission.host" value="{{ config.get('transmission',{}).get('host','') }}">
+                <label for="s-tr-host">Host</label>
               </div>
-              <div class="form-group">
-                <label for="s-tr-port">Port</label>
+              <div class="input-field col s4">
                 <input type="number" id="s-tr-port" name="transmission.port" value="{{ config.get('transmission',{}).get('port','') }}">
+                <label for="s-tr-port">Port</label>
               </div>
             </div>
-            <div class="form-row">
-              <div class="form-group">
-                <label for="s-tr-user">Username</label>
+            <div class="row">
+              <div class="input-field col s6">
                 <input type="text" id="s-tr-user" name="transmission.username" value="{{ config.get('transmission',{}).get('username','') }}">
+                <label for="s-tr-user">Username</label>
               </div>
-              <div class="form-group">
-                <label for="s-tr-pass">Password</label>
+              <div class="input-field col s6">
                 <input type="password" id="s-tr-pass" name="transmission.password" value="{{ config.get('transmission',{}).get('password','') }}">
+                <label for="s-tr-pass">Password</label>
               </div>
             </div>
-            <button type="submit" class="btn btn-primary" id="save-transmission-btn">Save Connection</button>
+            <button type="submit" class="btn waves-effect waves-light indigo">Save Connection</button>
           </form>
         </div>
-      </section>
+      </div>
+    </div>
+  </div>
 
-      <!-- Change Password -->
-      <section class="card" id="password-card">
-        <div class="card-header"><h2>Change Your Password</h2></div>
-        <div class="card-body">
+  <div class="row">
+    <!-- Change Password -->
+    <div class="col s12 xl6">
+      <div class="card">
+        <div class="card-content">
+          <span class="card-title">Change Your Password</span>
           <form id="password-form">
-            <div class="form-group">
-              <label for="pw-current">Current Password</label>
+            <div class="input-field">
               <input type="password" id="pw-current" required>
+              <label for="pw-current">Current Password</label>
             </div>
-            <div class="form-group">
-              <label for="pw-new">New Password</label>
+            <div class="input-field">
               <input type="password" id="pw-new" required minlength="4">
+              <label for="pw-new">New Password</label>
             </div>
-            <div class="form-group">
-              <label for="pw-confirm">Confirm New Password</label>
+            <div class="input-field">
               <input type="password" id="pw-confirm" required minlength="4">
+              <label for="pw-confirm">Confirm New Password</label>
             </div>
-            <button type="submit" class="btn btn-primary" id="change-password-btn">Update Password</button>
+            <button type="submit" class="btn waves-effect waves-light indigo">Update Password</button>
           </form>
         </div>
-      </section>
+      </div>
+    </div>
 
-      <!-- User Management -->
-      <section class="card" id="user-management-card">
-        <div class="card-header"><h2>User Management</h2></div>
-        <div class="card-body">
-          <div id="user-list" class="user-list"></div>
-          <hr class="divider">
-          <h3 class="section-title">Add User</h3>
+    <!-- User Management -->
+    <div class="col s12 xl6">
+      <div class="card">
+        <div class="card-content">
+          <span class="card-title">User Management</span>
+          <ul class="collection" id="user-list"></ul>
+          
+          <h5 style="margin-top: 2rem;">Add User</h5>
           <form id="add-user-form">
-            <div class="form-row">
-              <div class="form-group">
-                <label for="new-user-name">Username</label>
+            <div class="row">
+              <div class="input-field col s12 m4">
                 <input type="text" id="new-user-name" required>
+                <label for="new-user-name">Username</label>
               </div>
-              <div class="form-group">
-                <label for="new-user-pass">Password</label>
+              <div class="input-field col s12 m4">
                 <input type="password" id="new-user-pass" required>
+                <label for="new-user-pass">Password</label>
               </div>
-              <div class="form-group">
-                <label for="new-user-role">Role</label>
+              <div class="input-field col s12 m4">
                 <select id="new-user-role">
                   <option value="admin">Admin</option>
                   <option value="viewer">Viewer</option>
                 </select>
+                <label>Role</label>
               </div>
             </div>
-            <button type="submit" class="btn btn-secondary" id="add-user-btn">Add User</button>
+            <button type="submit" class="btn waves-effect waves-light grey darken-2">Add User</button>
           </form>
         </div>
-      </section>
+      </div>
     </div>
-  </main>
-</div>
+  </div>
+</main>
 {% endblock %}
 
 {% block scripts %}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    var sidenavElems = document.querySelectorAll('.sidenav');
+    M.Sidenav.init(sidenavElems);
+    var selectElems = document.querySelectorAll('select');
+    M.FormSelect.init(selectElems);
+    M.updateTextFields();
+  });
+</script>
 <script src="{{ url_for('static', filename='js/app.js') }}"></script>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-  // ── Settings form ─────────────────────────────
   document.getElementById('settings-form').addEventListener('submit', async e => {
     e.preventDefault();
     const fd = new FormData(e.target);
@@ -178,10 +191,9 @@ document.addEventListener('DOMContentLoaded', () => {
       method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(data)
     });
     const j = await res.json();
-    showToast(j.message || 'Saved', j.ok ? 'success' : 'error');
+    window.showToast(j.message || 'Saved', j.ok ? 'success' : 'error');
   });
 
-  // ── Transmission form ─────────────────────────
   document.getElementById('transmission-form').addEventListener('submit', async e => {
     e.preventDefault();
     const fd = new FormData(e.target);
@@ -190,36 +202,35 @@ document.addEventListener('DOMContentLoaded', () => {
       method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(data)
     });
     const j = await res.json();
-    showToast(j.message || 'Saved', j.ok ? 'success' : 'error');
+    window.showToast(j.message || 'Saved', j.ok ? 'success' : 'error');
   });
 
-  // ── Change password ───────────────────────────
   document.getElementById('password-form').addEventListener('submit', async e => {
     e.preventDefault();
     const cur  = document.getElementById('pw-current').value;
     const npw  = document.getElementById('pw-new').value;
     const conf = document.getElementById('pw-confirm').value;
-    if (npw !== conf) { showToast('Passwords do not match.', 'error'); return; }
+    if (npw !== conf) { window.showToast('Passwords do not match.', 'error'); return; }
     const res = await fetch('/api/change-password', {
       method: 'POST', headers: {'Content-Type':'application/json'},
       body: JSON.stringify({current_password: cur, new_password: npw})
     });
     const j = await res.json();
-    showToast(j.message, j.ok ? 'success' : 'error');
+    window.showToast(j.message, j.ok ? 'success' : 'error');
     if (j.ok) e.target.reset();
   });
 
-  // ── User management ───────────────────────────
   async function loadUsers() {
     const res = await fetch('/api/users');
     const j = await res.json();
     const list = document.getElementById('user-list');
     list.innerHTML = j.users.map(u => `
-      <div class="user-row">
-        <span class="user-name">${u.username}</span>
-        <span class="user-role-badge role-${u.role}">${u.role}</span>
-        <button class="btn btn-danger btn-sm" onclick="deleteUser('${u.username}')">Remove</button>
-      </div>
+      <li class="collection-item">
+        <div>
+          <strong>${u.username}</strong> <span class="new badge grey" data-badge-caption="${u.role}"></span>
+          <a href="#!" class="secondary-content red-text" onclick="deleteUser('${u.username}')" title="Remove"><i class="material-icons">delete</i></a>
+        </div>
+      </li>
     `).join('');
   }
 
@@ -230,7 +241,7 @@ document.addEventListener('DOMContentLoaded', () => {
       body: JSON.stringify({username})
     });
     const j = await res.json();
-    showToast(j.message, j.ok ? 'success' : 'error');
+    window.showToast(j.message, j.ok ? 'success' : 'error');
     if (j.ok) loadUsers();
   };
 
@@ -244,7 +255,7 @@ document.addEventListener('DOMContentLoaded', () => {
       body: JSON.stringify({username, password, role})
     });
     const j = await res.json();
-    showToast(j.message, j.ok ? 'success' : 'error');
+    window.showToast(j.message, j.ok ? 'success' : 'error');
     if (j.ok) { e.target.reset(); loadUsers(); }
   });
 

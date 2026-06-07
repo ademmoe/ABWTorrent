@@ -5,13 +5,45 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="ABWTorrent — Internal LAN ISO distribution dashboard">
   <title>{% block title %}ABWTorrent{% endblock %}</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <!-- Materialize CSS -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+  <!-- Material Icons -->
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <style>
+    body {
+      display: flex;
+      min-height: 100vh;
+      flex-direction: column;
+      background-color: #fafafa;
+    }
+    main {
+      flex: 1 0 auto;
+    }
+    .brand-logo {
+      padding-left: 1rem !important;
+    }
+    /* Dashboard specific layout */
+    body.has-sidebar header, 
+    body.has-sidebar main, 
+    body.has-sidebar footer {
+      padding-left: 300px;
+    }
+    @media only screen and (max-width : 992px) {
+      body.has-sidebar header, 
+      body.has-sidebar main, 
+      body.has-sidebar footer {
+        padding-left: 0;
+      }
+    }
+    .toast-success { background-color: #4caf50; }
+    .toast-error { background-color: #f44336; }
+  </style>
+  {% block extra_head %}{% endblock %}
 </head>
-<body>
+<body class="{% block body_class %}{% endblock %}">
   {% block body %}{% endblock %}
+  <!-- Materialize JS -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
   {% block scripts %}{% endblock %}
 </body>
 </html>

@@ -42,17 +42,10 @@
   // ── Toast system ──────────────────────────────
 
   window.showToast = function (message, type = 'success') {
-    let container = document.querySelector('.toast-container');
-    if (!container) {
-      container = document.createElement('div');
-      container.className = 'toast-container';
-      document.body.appendChild(container);
-    }
-    const el = document.createElement('div');
-    el.className = 'toast toast-' + type;
-    el.textContent = message;
-    container.appendChild(el);
-    setTimeout(() => el.remove(), 3200);
+    M.toast({
+      html: message,
+      classes: type === 'error' ? 'red lighten-1' : 'green lighten-1'
+    });
   };
 
   // ── Dashboard refresh ─────────────────────────
@@ -71,7 +64,6 @@
 
       updateStats(tData.stats, tData.torrents);
       updateTable(tData.torrents);
-      updateFiles(fData.files);
     } catch (e) {
       console.warn('Refresh failed:', e);
     }
@@ -92,18 +84,25 @@
 
   function updateTable(torrents) {
     if (!torrents.length) {
-      tbody.innerHTML = '<tr><td colspan="9" class="empty-state">No torrents loaded yet. Add ISOs to the watch directory.</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="9" class="center-align grey-text" style="padding: 3rem;">No torrents loaded yet. Add ISOs to the watch directory.</td></tr>';
       return;
     }
 
     tbody.innerHTML = torrents.map(t => {
       const sc = statusClass(t.status);
+      let badgeColor = 'grey';
+      if (sc === 'seeding') badgeColor = 'green';
+      if (sc === 'downloading') badgeColor = 'blue';
+      if (sc === 'checking') badgeColor = 'orange';
+
       return `<tr>
-        <td title="${t.name}" style="max-width:220px;overflow:hidden;text-overflow:ellipsis">${t.name}</td>
-        <td><span class="status status--${sc}">${statusLabel(t.status)}</span></td>
-        <td>
-          <span class="progress-bar"><span class="progress-bar__fill" style="width:${t.progress}%"></span></span>
-          ${t.progress}%
+        <td title="${t.name}" style="max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${t.name}</td>
+        <td><span class="new badge ${badgeColor}" data-badge-caption="">${statusLabel(t.status)}</span></td>
+        <td style="width: 150px;">
+          <div class="progress" style="margin: 0; background-color: #e0e0e0;">
+              <div class="determinate indigo" style="width: ${t.progress}%"></div>
+          </div>
+          <small>${t.progress}%</small>
         </td>
         <td>${fmtBytes(t.size)}</td>
         <td>${fmtBytes(t.uploaded)}</td>
@@ -112,36 +111,13 @@
         <td>${t.peers}</td>
         <td>
           ${sc === 'seeding' || sc === 'downloading'
-            ? `<button class="btn-icon" title="Pause" onclick="torrentAction(${t.id},'pause')">⏸</button>`
-            : `<button class="btn-icon" title="Resume" onclick="torrentAction(${t.id},'resume')">▶</button>`
+            ? `<a href="#!" class="indigo-text" title="Pause" onclick="torrentAction(${t.id},'pause')"><i class="material-icons">pause</i></a>`
+            : `<a href="#!" class="indigo-text" title="Resume" onclick="torrentAction(${t.id},'resume')"><i class="material-icons">play_arrow</i></a>`
           }
-          <button class="btn-icon" title="Remove" onclick="torrentAction(${t.id},'remove')">✕</button>
+          <a href="#!" class="red-text" style="margin-left:8px;" title="Remove" onclick="torrentAction(${t.id},'remove')"><i class="material-icons">close</i></a>
         </td>
       </tr>`;
     }).join('');
-  }
-
-  function updateFiles(files) {
-    const grid = document.getElementById('torrent-files-grid');
-    if (!grid) return;
-
-    if (!files.length) {
-      grid.innerHTML = '<p class="empty-state">No .torrent files generated yet.</p>';
-      return;
-    }
-
-    grid.innerHTML = files.map(f => `
-      <div class="file-item">
-        <div class="file-icon">
-          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-        </div>
-        <div class="file-info">
-          <span class="file-name" title="${f.name}">${f.name}</span>
-          <span class="file-size">${fmtBytes(f.size)}</span>
-        </div>
-        <a href="/download/${encodeURIComponent(f.name)}" class="file-download">Download</a>
-      </div>
-    `).join('');
   }
 
   // ── Torrent actions ───────────────────────────

@@ -93,16 +93,16 @@ class TransmissionClient:
                 {
                     "id": t.id,
                     "name": t.name,
-                    "status": str(t.status),
-                    "progress": round(t.percent_done * 100, 1),
-                    "size": t.total_size,
-                    "uploaded": t.uploaded_ever,
-                    "ratio": round(t.ratio, 2),
-                    "upload_speed": t.rate_upload,
-                    "download_speed": t.rate_download,
-                    "peers": t.peers_connected,
-                    "added": str(t.date_added) if t.date_added else None,
-                    "download_dir": t.download_dir,
+                    "status": getattr(t.status, 'value', str(t.status)),
+                    "progress": round(getattr(t, 'percent_done', getattr(t, 'percentDone', 0)) * 100, 1),
+                    "size": getattr(t, 'total_size', getattr(t, 'totalSize', 0)),
+                    "uploaded": getattr(t, 'uploaded_ever', getattr(t, 'uploadedEver', 0)),
+                    "ratio": round(getattr(t, 'ratio', 0), 2),
+                    "upload_speed": getattr(t, 'rate_upload', getattr(t, 'rateUpload', 0)),
+                    "download_speed": getattr(t, 'rate_download', getattr(t, 'rateDownload', 0)),
+                    "peers": getattr(t, 'peers_connected', getattr(t, 'peersConnected', 0)),
+                    "added": str(getattr(t, 'date_added', getattr(t, 'addedDate', ''))),
+                    "download_dir": getattr(t, 'download_dir', getattr(t, 'downloadDir', '')),
                 }
                 for t in self.client.get_torrents()
             ]
@@ -114,11 +114,11 @@ class TransmissionClient:
         try:
             s = self.client.session_stats()
             return {
-                "active": s.active_torrent_count,
-                "paused": s.paused_torrent_count,
-                "total": s.torrent_count,
-                "upload_speed": s.upload_speed,
-                "download_speed": s.download_speed,
+                "active": getattr(s, 'active_torrent_count', getattr(s, 'activeTorrentCount', 0)),
+                "paused": getattr(s, 'paused_torrent_count', getattr(s, 'pausedTorrentCount', 0)),
+                "total": getattr(s, 'torrent_count', getattr(s, 'torrentCount', 0)),
+                "upload_speed": getattr(s, 'upload_speed', getattr(s, 'uploadSpeed', 0)),
+                "download_speed": getattr(s, 'download_speed', getattr(s, 'downloadSpeed', 0)),
             }
         except Exception as exc:
             logger.error("get_session_stats: %s", exc)

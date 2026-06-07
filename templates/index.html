@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% block title %}Torrents — ABWTorrent{% endblock %}
+
+{% block body %}
+<nav class="indigo">
+  <div class="nav-wrapper container">
+    <a href="#" class="brand-logo"><i class="material-icons">cloud_download</i> ABWTorrent</a>
+    <ul id="nav-mobile" class="right hide-on-med-and-down">
+      <li><a href="{{ url_for('dashboard') }}">Admin Login</a></li>
+    </ul>
+  </div>
+</nav>
+
+<main class="container" style="padding-top: 2rem;">
+  <div class="row">
+    <div class="col s12">
+      <h4 class="center-align" style="margin-bottom: 2rem;">Available Torrents</h4>
+      
+      <div class="input-field">
+        <i class="material-icons prefix">search</i>
+        <input type="text" id="search-input" placeholder="Search for torrents...">
+      </div>
+
+      <div class="collection" id="torrent-list">
+        <div class="collection-item center-align grey-text" style="padding: 2rem;">Loading...</div>
+      </div>
+    </div>
+  </div>
+</main>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', async () => {
+  const listEl = document.getElementById('torrent-list');
+  const searchInput = document.getElementById('search-input');
+  let filesData = [];
+
+  function fmtBytes(n) {
+    if (n == null || n === 0) return '0 B';
+    const units = ['B', 'KiB', 'MiB', 'GiB', 'TiB'];
+    let i = 0;
+    while (Math.abs(n) >= 1024 && i < units.length - 1) { n /= 1024; i++; }
+    return n.toFixed(1) + ' ' + units[i];
+  }
+
+  function renderList(query = '') {
+    const q = query.toLowerCase();
+    const filtered = filesData.filter(f => f.name.toLowerCase().includes(q));
+    
+    if (filtered.length === 0) {
+      listEl.innerHTML = '<div class="collection-item center-align grey-text" style="padding: 2rem;">No torrents found.</div>';
+      return;
+    }
+
+    listEl.innerHTML = filtered.map(f => `
+      <div class="collection-item avatar" style="display: flex; align-items: center; padding-left: 20px;">
+        <i class="material-icons circle indigo">insert_drive_file</i>
+        <div style="flex: 1; padding-left: 1rem;">
+          <span class="title" style="font-weight: 500;">${f.name}</span>
+          <p class="grey-text">${fmtBytes(f.size)}</p>
+        </div>
+        <a href="/download/${encodeURIComponent(f.name)}" class="btn waves-effect waves-light indigo" style="flex-shrink: 0;">
+          <i class="material-icons left">file_download</i> Download
+        </a>
+      </div>
+    `).join('');
+  }
+
+  try {
+    const res = await fetch('/api/torrent-files');
+    const j = await res.json();
+    filesData = j.files || [];
+    renderList();
+  } catch (e) {
+    listEl.innerHTML = '<div class="collection-item center-align red-text">Failed to load torrents.</div>';
+  }
+
+  searchInput.addEventListener('input', (e) => {
+    renderList(e.target.value);
+  });
+});
+</script>
+{% endblock %}

@@ -76,10 +76,15 @@ def logout():
     return redirect(url_for("login"))
 
 
-@app.route("/")
+@app.route("/admin")
 @login_required
 def dashboard():
     return render_template("dashboard.html", user=session["user"])
+
+
+@app.route("/")
+def index():
+    return render_template("index.html")
 
 
 @app.route("/settings")
@@ -211,7 +216,6 @@ def api_users():
 
 
 @app.route("/download/<filename>")
-@login_required
 def download_torrent(filename):
     torrent_dir = config.get("torrent_output_dir")
     if not filename.endswith(".torrent"):
@@ -220,7 +224,6 @@ def download_torrent(filename):
 
 
 @app.route("/api/torrent-files")
-@login_required
 def api_torrent_files():
     torrent_dir = config.get("torrent_output_dir")
     files = []

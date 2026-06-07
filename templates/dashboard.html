@@ -1,91 +1,92 @@
 {% extends "base.html" %}
 {% block title %}Dashboard — ABWTorrent{% endblock %}
+{% block body_class %}has-sidebar{% endblock %}
 
 {% block body %}
-<div class="app-layout">
-  <!-- Sidebar -->
-  <nav class="sidebar" id="sidebar">
-    <div class="sidebar-brand">
-      <svg width="32" height="32" viewBox="0 0 48 48" fill="none">
-        <rect width="48" height="48" rx="12" fill="url(#gs)"/>
-        <path d="M14 24l6 6 14-14" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-        <defs><linearGradient id="gs" x1="0" y1="0" x2="48" y2="48"><stop stop-color="#6366f1"/><stop offset="1" stop-color="#8b5cf6"/></linearGradient></defs>
-      </svg>
-      <span>ABWTorrent</span>
-    </div>
-
-    <ul class="nav-links">
-      <li><a href="{{ url_for('dashboard') }}" class="active" id="nav-dashboard">
-        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-        Dashboard
-      </a></li>
-      <li><a href="{{ url_for('settings') }}" id="nav-settings">
-        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
-        Settings
-      </a></li>
-    </ul>
-
-    <div class="sidebar-footer">
-      <span class="user-badge">{{ user }}</span>
-      <a href="{{ url_for('logout') }}" class="logout-link" id="logout-link">Sign out</a>
+<!-- Navbar for mobile -->
+<header>
+  <nav class="indigo top-nav hide-on-large-only">
+    <div class="nav-wrapper">
+      <a href="#" data-target="slide-out" class="sidenav-trigger"><i class="material-icons">menu</i></a>
+      <a href="#!" class="brand-logo">Dashboard</a>
     </div>
   </nav>
+</header>
 
-  <!-- Main -->
-  <main class="main-content">
-    <header class="page-header">
-      <h1>Dashboard</h1>
-      <p class="page-subtitle">Real-time torrent seeding overview</p>
-    </header>
+<!-- Sidebar -->
+<ul id="slide-out" class="sidenav sidenav-fixed">
+  <li><div class="user-view">
+    <div class="background indigo"></div>
+    <a href="#!"><i class="material-icons large white-text">cloud_download</i></a>
+    <a href="#!"><span class="white-text name">ABWTorrent</span></a>
+    <a href="#!"><span class="white-text email">Role: {{ user }}</span></a>
+  </div></li>
+  <li class="active"><a href="{{ url_for('dashboard') }}" class="waves-effect"><i class="material-icons">dashboard</i>Dashboard</a></li>
+  <li><a href="{{ url_for('settings') }}" class="waves-effect"><i class="material-icons">settings</i>Settings</a></li>
+  <li><div class="divider"></div></li>
+  <li><a href="{{ url_for('logout') }}" class="waves-effect"><i class="material-icons">exit_to_app</i>Sign out</a></li>
+  
+  <li style="margin-top: auto;">
+    <div style="padding: 1rem; color: #9e9e9e; font-size: 0.8rem; line-height: 1.4;">
+      <strong>Credits:</strong><br>
+      Adem Karagöz (Main Programmer)<br>
+      Dominic Naumann<br>
+      Sönke Einnolf
+    </div>
+  </li>
+</ul>
 
-    <!-- Stats Row -->
-    <div class="stats-grid" id="stats-grid">
-      <div class="stat-card">
-        <div class="stat-icon stat-icon--active">
-          <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
-        </div>
-        <div class="stat-body">
-          <span class="stat-value" id="stat-active">—</span>
-          <span class="stat-label">Active Torrents</span>
-        </div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-icon stat-icon--upload">
-          <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 014-4h14"/></svg>
-        </div>
-        <div class="stat-body">
-          <span class="stat-value" id="stat-upload">—</span>
-          <span class="stat-label">Upload Speed</span>
-        </div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-icon stat-icon--peers">
-          <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
-        </div>
-        <div class="stat-body">
-          <span class="stat-value" id="stat-peers">—</span>
-          <span class="stat-label">Connected Peers</span>
-        </div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-icon stat-icon--total">
-          <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>
-        </div>
-        <div class="stat-body">
-          <span class="stat-value" id="stat-total">—</span>
-          <span class="stat-label">Total Torrents</span>
+<!-- Main Content -->
+<main style="padding: 2rem;">
+  <h4>Dashboard</h4>
+  <p class="grey-text">Real-time torrent seeding overview</p>
+
+  <!-- Stats Row -->
+  <div class="row">
+    <div class="col s12 m6 l3">
+      <div class="card panel center-align">
+        <div class="card-content">
+          <i class="material-icons medium indigo-text">play_arrow</i>
+          <h4 id="stat-active">—</h4>
+          <span class="grey-text">Active Torrents</span>
         </div>
       </div>
     </div>
-
-    <!-- Torrents Table -->
-    <section class="card" id="torrents-card">
-      <div class="card-header">
-        <h2>Seeding Torrents</h2>
-        <span class="badge" id="torrent-count-badge">0</span>
+    <div class="col s12 m6 l3">
+      <div class="card panel center-align">
+        <div class="card-content">
+          <i class="material-icons medium green-text">arrow_upward</i>
+          <h4 id="stat-upload">—</h4>
+          <span class="grey-text">Upload Speed</span>
+        </div>
       </div>
-      <div class="table-wrap">
-        <table class="data-table" id="torrents-table">
+    </div>
+    <div class="col s12 m6 l3">
+      <div class="card panel center-align">
+        <div class="card-content">
+          <i class="material-icons medium blue-text">people</i>
+          <h4 id="stat-peers">—</h4>
+          <span class="grey-text">Connected Peers</span>
+        </div>
+      </div>
+    </div>
+    <div class="col s12 m6 l3">
+      <div class="card panel center-align">
+        <div class="card-content">
+          <i class="material-icons medium orange-text">format_list_bulleted</i>
+          <h4 id="stat-total">—</h4>
+          <span class="grey-text">Total Torrents</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Torrents Table -->
+  <div class="card">
+    <div class="card-content">
+      <span class="card-title">Seeding Torrents <span class="new badge indigo" data-badge-caption="" id="torrent-count-badge">0</span></span>
+      <div style="overflow-x: auto;">
+        <table class="highlight responsive-table" id="torrents-table">
           <thead>
             <tr>
               <th>Name</th>
@@ -100,25 +101,22 @@
             </tr>
           </thead>
           <tbody id="torrents-tbody">
-            <tr><td colspan="9" class="empty-state">Loading…</td></tr>
+            <tr><td colspan="9" class="center-align grey-text" style="padding: 3rem;">Loading…</td></tr>
           </tbody>
         </table>
       </div>
-    </section>
+    </div>
+  </div>
 
-    <!-- Torrent Files -->
-    <section class="card" id="files-card">
-      <div class="card-header">
-        <h2>Downloadable .torrent Files</h2>
-      </div>
-      <div class="file-grid" id="torrent-files-grid">
-        <p class="empty-state">Loading…</p>
-      </div>
-    </section>
-  </main>
-</div>
+</main>
 {% endblock %}
 
 {% block scripts %}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    var elems = document.querySelectorAll('.sidenav');
+    M.Sidenav.init(elems);
+  });
+</script>
 <script src="{{ url_for('static', filename='js/app.js') }}"></script>
 {% endblock %}
