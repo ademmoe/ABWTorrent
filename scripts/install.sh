@@ -17,7 +17,7 @@ echo "╔═══════════════════════�
 echo "║    ABWTorrent Installer v1.0         ║"
 echo "║                                      ║"
 echo "║    Credits:                          ║"
-echo "║    Adem Karagöz (Main Programmer)    ║"
+echo "║    Adem Karagoez                     ║"
 echo "║    Dominic Naumann                   ║"
 echo "║    Sönke Einnolf                     ║"
 echo "╚══════════════════════════════════════╝"
