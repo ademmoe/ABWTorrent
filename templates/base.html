@@ -57,7 +57,6 @@
     <nav class="indigo top-nav">
       <div class="nav-wrapper" style="padding: 0 2rem; display: flex; align-items: center; justify-content: space-between;">
         <div style="display: flex; align-items: center; gap: 2rem;">
-          <a href="{{ url_for('index') }}" style="font-size: 2.1rem; color: #fff;">ABWTorrent</a>
           {% if session.get('user') %}
           <span class="hide-on-med-and-down" style="font-size: 1.1rem; padding-top: 5px;">Logged in as: <strong>{{ session.get('user') }}</strong></span>
           {% endif %}
@@ -89,7 +88,7 @@
   <!-- Footer with Credits -->
   <footer>
     <div>
-      <strong>ABWTorrent</strong> — Developed by Adem Karagöz | Credits: Dominic Naumann, Sönke Einnolf
+      <strong>ABWTorrent</strong> - Developed by Adem Karagöz | Credits: Dominic Naumann, Sönke Einnolf
     </div>
   </footer>
 
