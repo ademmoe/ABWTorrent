@@ -37,7 +37,10 @@
     .sidenav-fixed {
       transition: transform 0.3s ease;
     }
-    .sidebar-collapsed .sidenav-fixed {
+    body.has-sidebar .sidenav-fixed {
+      transform: translateX(0) !important;
+    }
+    body.has-sidebar.sidebar-collapsed .sidenav-fixed {
       transform: translateX(-105%) !important;
     }
     @media only screen and (max-width : 992px) {
