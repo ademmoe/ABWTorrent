@@ -348,6 +348,7 @@ a { color: var(--accent-light); text-decoration: none; }
   border-radius: var(--radius-xs);
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0;
+  padding-right:30px;
 }
 
 .file-info { flex: 1; min-width: 0; }
