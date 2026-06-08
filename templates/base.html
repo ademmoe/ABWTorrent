@@ -36,6 +36,13 @@
     }
     .sidenav-fixed {
       transition: transform 0.3s ease;
+      transform: translateX(0);
+    }
+    body.has-sidebar.sidebar-open .sidenav-fixed {
+      transform: translateX(0) !important;
+    }
+    body.has-sidebar:not(.sidebar-open) .sidenav-fixed {
+      transform: translateX(-100%) !important;
     }
     @media only screen and (max-width : 992px) {
       body.has-sidebar header, 
