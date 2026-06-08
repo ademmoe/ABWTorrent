@@ -27,6 +27,25 @@ logger = logging.getLogger("abwtorrent")
 
 # ── Mount verification ───────────────────────────────────
 
+def is_mount_point(path: str) -> bool:
+    """
+    Check if a path is an actual mount point by reading /proc/mounts.
+    More reliable than Path.is_mount() for NAS mounts.
+    """
+    path_str = str(Path(path).resolve())
+    try:
+        with open("/proc/mounts", "r") as f:
+            for line in f:
+                parts = line.split()
+                if len(parts) >= 2:
+                    mount_point = parts[1]
+                    if mount_point == path_str:
+                        return True
+    except (OSError, IOError):
+        pass
+    return False
+
+
 def wait_for_mount(mountpoint: str, max_wait: int = 300, check_interval: int = 5) -> bool:
     """
     Wait for the NAS to be mounted at the specified mountpoint.
@@ -42,12 +61,9 @@ def wait_for_mount(mountpoint: str, max_wait: int = 300, check_interval: int = 5
     
     while elapsed < max_wait:
         # Check if already mounted
-        try:
-            if Path(mountpoint).is_mount():
-                logger.info("✓ Mount point %s is ready", mountpoint)
-                return True
-        except (OSError, RuntimeError):
-            pass
+        if is_mount_point(mountpoint):
+            logger.info("✓ Mount point %s is ready", mountpoint)
+            return True
         
         # On first iteration, try to mount via systemctl if not already mounted
         if first_check:
@@ -64,7 +80,7 @@ def wait_for_mount(mountpoint: str, max_wait: int = 300, check_interval: int = 5
                     if result.returncode == 0:
                         logger.info("Systemctl mount command succeeded")
                         time.sleep(2)  # Give mount time to settle
-                        if Path(mountpoint).is_mount():
+                        if is_mount_point(mountpoint):
                             logger.info("✓ Mount point %s is ready", mountpoint)
                             return True
                     else:
@@ -102,29 +118,23 @@ def extract_nas_mount(watch_dir: str) -> str:
     - /mnt/storage/iso/... → /mnt/storage
     
     Assumes NAS is mounted 2 levels deep (e.g., /media/nas or /mnt/disk).
-    If that fails, returns the parent of watch_dir.
+    If that fails, walks up the tree to find an actual mount point.
     """
     watch_path = Path(watch_dir).resolve()
     
     # Try 2-level assumption first (/media/nas, /mnt/disk, etc.)
     if len(watch_path.parts) >= 3:
         candidate = Path(*watch_path.parts[:3])  # e.g., ('/', 'media', 'nas') → /media/nas
-        try:
-            if candidate.is_mount():
-                logger.info("Detected NAS mount: %s", candidate)
-                return str(candidate)
-        except (OSError, RuntimeError):
-            pass
+        if is_mount_point(str(candidate)):
+            logger.info("Detected NAS mount: %s", candidate)
+            return str(candidate)
     
-    # Fallback: walk up until we find a mount point
+    # Fallback: walk up until we find a mount point (but skip root)
     current = watch_path
-    while str(current) != "/":
-        try:
-            if current.is_mount():
-                logger.info("Detected NAS mount (fallback): %s", current)
-                return str(current)
-        except (OSError, RuntimeError):
-            pass
+    while str(current) != "/" and current.parent != current:
+        if is_mount_point(str(current)):
+            logger.info("Detected NAS mount (fallback): %s", current)
+            return str(current)
         current = current.parent
     
     # Last resort: assume /media/nas
