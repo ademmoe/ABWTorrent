@@ -248,11 +248,13 @@ def main():
     gen = TorrentGenerator(config)
     tc  = TransmissionClient(config)
 
-    # Wait for NAS mount
+    # Wait for NAS mount (read timeout from config)
     watch_dir = config.get("watch_dir")
     nas_mount = extract_nas_mount(watch_dir)
+    max_wait = config.get("mount.max_wait_seconds", 300)
+    check_interval = config.get("mount.check_interval_seconds", 5)
     
-    if not wait_for_mount(nas_mount):
+    if not wait_for_mount(nas_mount, max_wait=max_wait, check_interval=check_interval):
         logger.error("NAS mount point %s is unavailable. Giving up.", nas_mount)
         sys.exit(1)
 
