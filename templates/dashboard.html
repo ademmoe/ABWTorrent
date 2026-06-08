@@ -1,21 +1,5 @@
 {% extends "base.html" %}
 {% block page_title %}Dashboard — ABWTorrent{% endblock %}
-{% block body_class %}has-sidebar{% endblock %}
-
-{% block sidebar %}
-<ul id="slide-out" class="sidenav sidenav-fixed">
-  <li><div class="user-view">
-    <div class="background indigo"></div>
-    <a href="#!"><i class="material-icons large white-text">cloud_download</i></a>
-    <a href="#!"><span class="white-text name">ABWTorrent</span></a>
-    <a href="#!"><span class="white-text email">Role: {{ user }}</span></a>
-  </div></li>
-  <li class="active"><a href="{{ url_for('dashboard') }}" class="waves-effect"><i class="material-icons">dashboard</i>Dashboard</a></li>
-  <li><a href="{{ url_for('settings') }}" class="waves-effect"><i class="material-icons">settings</i>Settings</a></li>
-  <li><div class="divider"></div></li>
-  <li><a href="{{ url_for('logout') }}" class="waves-effect"><i class="material-icons">exit_to_app</i>Sign out</a></li>
-</ul>
-{% endblock %}
 
 {% block body %}
 <h4>Dashboard</h4>

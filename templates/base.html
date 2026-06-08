@@ -43,47 +43,43 @@
       color: #666;
       text-align: center;
     }
-    .sidenav-fixed {
-      position: fixed;
-      left: 0;
-      top: 0;
-      height: 100vh;
-      z-index: 99;
-      transition: transform 0.3s ease;
-    }
-    body.has-sidebar .sidenav-fixed {
-      transform: translateX(0);
-    }
-    body.has-sidebar.sidebar-closed .sidenav-fixed {
-      transform: translateX(-100%);
-    }
     .brand-logo {
       padding-left: 3rem !important;
     }
     .toast-success { background-color: #4caf50; }
     .toast-error { background-color: #f44336; }
-    @media only screen and (max-width: 992px) {
-      .sidenav-fixed {
-        width: 85% !important;
-        max-width: 300px;
-      }
-    }
   </style>
   {% block extra_head %}{% endblock %}
 </head>
 <body class="{% block body_class %}{% endblock %}">
-  <!-- Navbar Header -->
+    <!-- Navbar Header -->
   <header>
     <nav class="indigo top-nav">
-      <div class="nav-wrapper">
-        <a href="#" id="sidebar-toggle" class="sidenav-trigger show-on-large" style="display: inline-block; margin-left: 1rem;"><i class="material-icons">menu</i></a>
-        <a href="#!" class="brand-logo">{% block page_title %}ABWTorrent{% endblock %}</a>
+      <div class="nav-wrapper" style="padding: 0 2rem; display: flex; align-items: center; justify-content: space-between;">
+        <div style="display: flex; align-items: center; gap: 2rem;">
+          <a href="{{ url_for('index') }}" style="font-size: 2.1rem; color: #fff;">ABWTorrent</a>
+          {% if session.get('user') %}
+          <span class="hide-on-med-and-down" style="font-size: 1.1rem; padding-top: 5px;">Logged in as: <strong>{{ session.get('user') }}</strong></span>
+          {% endif %}
+        </div>
+
+        <div>
+
+        {% if session.get('user') %}
+        <ul class="right hide-on-med-and-down" style="margin: 0; display: flex;">
+          <li><a href="{{ url_for('dashboard') }}" class="waves-effect"><i class="material-icons left">dashboard</i>Dashboard</a></li>
+          <li><a href="{{ url_for('settings') }}" class="waves-effect"><i class="material-icons left">settings</i>Settings</a></li>
+          <li><a href="{{ url_for('logout') }}" class="waves-effect"><i class="material-icons left">exit_to_app</i>Sign out</a></li>
+        </ul>
+        {% else %}
+        <ul class="right hide-on-med-and-down" style="margin: 0; display: flex;">
+          <li><a href="{{ url_for('dashboard') }}">Admin Login</a></li>
+        </ul>
+        {% endif %}
+        </div>
       </div>
     </nav>
   </header>
-
-  <!-- Sidebar -->
-  {% block sidebar %}{% endblock %}
 
   <!-- Main Content -->
   <main>

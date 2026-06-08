@@ -52,8 +52,6 @@
 
   const tbody = document.getElementById('torrents-tbody');
   if (!tbody) {
-    // Not on dashboard page, but initialize sidebar toggle
-    initSidebarToggle();
     return;
   }
 
@@ -140,36 +138,9 @@
     }
   };
 
-  // ── Sidebar Toggle Initialization ─────────────
-  
-  function initSidebarToggle() {
-    document.addEventListener('DOMContentLoaded', function() {
-      var elems = document.querySelectorAll('.sidenav');
-      M.Sidenav.init(elems);
-      
-      // Add sidebar-open class by default on desktop (width > 992px)
-      if (window.innerWidth > 992) {
-        document.body.classList.add('sidebar-open');
-      }
-      
-      var toggleBtn = document.getElementById('sidebar-toggle');
-      
-      if (toggleBtn) {
-        toggleBtn.addEventListener('click', function(e) {
-          e.preventDefault();
-          if (window.innerWidth > 992) {
-            // Toggle the sidebar-open class on body to adjust content padding
-            document.body.classList.toggle('sidebar-open');
-          }
-        });
-      }
-    });
-  }
-
   // ── Start polling ─────────────────────────────
 
   refresh();
   setInterval(refresh, REFRESH_INTERVAL);
-  initSidebarToggle();
 
 })();
