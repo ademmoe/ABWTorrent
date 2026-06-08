@@ -1,6 +1,6 @@
 [Unit]
 Description=ABWTorrent Web UI
-Documentation=https://github.com/abw/abwtorrent
+Documentation=https://github.com/ademmoe/abwtorrent
 After=network-online.target transmission-daemon.service
 Wants=network-online.target
 
