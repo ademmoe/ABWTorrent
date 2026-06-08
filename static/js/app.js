@@ -146,10 +146,15 @@
     document.addEventListener('DOMContentLoaded', function() {
       var elems = document.querySelectorAll('.sidenav');
       M.Sidenav.init(elems);
-      var toggleBtn = document.getElementById('sidebar-toggle');
-      var sidenav = document.getElementById('slide-out');
       
-      if (toggleBtn && sidenav) {
+      // Add sidebar-open class by default on desktop (width > 992px)
+      if (window.innerWidth > 992) {
+        document.body.classList.add('sidebar-open');
+      }
+      
+      var toggleBtn = document.getElementById('sidebar-toggle');
+      
+      if (toggleBtn) {
         toggleBtn.addEventListener('click', function(e) {
           e.preventDefault();
           if (window.innerWidth > 992) {
