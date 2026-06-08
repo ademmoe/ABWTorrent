@@ -147,11 +147,14 @@
       var elems = document.querySelectorAll('.sidenav');
       M.Sidenav.init(elems);
       var toggleBtn = document.getElementById('sidebar-toggle');
-      if (toggleBtn) {
+      var sidenav = document.getElementById('slide-out');
+      
+      if (toggleBtn && sidenav) {
         toggleBtn.addEventListener('click', function(e) {
           e.preventDefault();
           if (window.innerWidth > 992) {
-            document.body.classList.toggle('sidebar-collapsed');
+            // Toggle the sidebar-open class on body to adjust content padding
+            document.body.classList.toggle('sidebar-open');
           }
         });
       }
