@@ -5,6 +5,7 @@ import os
 import sys
 import json
 import functools
+import subprocess
 from pathlib import Path
 
 from flask import (Flask, render_template, request, redirect, url_for,
@@ -136,14 +137,27 @@ def api_save_settings():
         "transmission.username", "transmission.password",
         "log.level",
     }
+    needs_restart = False
     for key, val in data.items():
         if key in allowed:
             # Cast numeric values
             if key in ("torrent.piece_size", "file_stability.check_interval",
                        "file_stability.stable_count", "transmission.port"):
                 val = int(val)
+
+            # Check if watch_dir or torrent_output_dir has changed
+            if key in ("watch_dir", "torrent_output_dir") and config.get(key) != val:
+                needs_restart = True
+
             config.set(key, val)
     config.save()
+
+    if needs_restart:
+        try:
+            subprocess.run(["sudo", "systemctl", "restart", "abwtorrent-watchdog"], capture_output=True, check=True)
+        except subprocess.CalledProcessError as e:
+            print(f"Failed to restart watchdog: {e}")
+
     # Reload the Transmission client with new credentials
     tc._client = None
     return jsonify({"ok": True, "message": "Settings saved."})
