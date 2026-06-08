@@ -38,6 +38,8 @@ def wait_for_mount(mountpoint: str, max_wait: int = 300, check_interval: int = 5
     logger.info("Waiting for mount at %s (timeout: %ds)…", mountpoint, max_wait)
     
     elapsed = 0
+    first_check = True
+    
     while elapsed < max_wait:
         # Check if already mounted
         try:
@@ -48,7 +50,8 @@ def wait_for_mount(mountpoint: str, max_wait: int = 300, check_interval: int = 5
             pass
         
         # On first iteration, try to mount via systemctl if not already mounted
-        if elapsed == 0:
+        if first_check:
+            first_check = False
             mount_unit = _path_to_mount_unit(mountpoint)
             if mount_unit:
                 logger.info("Attempting to mount via systemctl start %s", mount_unit)
@@ -65,7 +68,8 @@ def wait_for_mount(mountpoint: str, max_wait: int = 300, check_interval: int = 5
                             logger.info("✓ Mount point %s is ready", mountpoint)
                             return True
                     else:
-                        logger.warning("Systemctl mount failed: %s", result.stderr.decode(errors="ignore"))
+                        stderr = result.stderr.decode(errors="ignore").strip()
+                        logger.warning("Systemctl mount failed: %s", stderr if stderr else "(no error output)")
                 except (subprocess.TimeoutExpired, FileNotFoundError) as exc:
                     logger.warning("Could not invoke systemctl: %s", exc)
         
@@ -83,8 +87,49 @@ def _path_to_mount_unit(path: str) -> str:
     """Convert a filesystem path to a systemd mount unit name."""
     # e.g., /media/nas → media-nas.mount
     path = str(path).strip("/")
+    if not path:
+        return None
     unit = path.replace("/", "-")
-    return f"{unit}.mount" if unit else None
+    return f"{unit}.mount"
+
+
+def extract_nas_mount(watch_dir: str) -> str:
+    """
+    Extract the NAS mount point from the watch directory path.
+    
+    Examples:
+    - /media/nas/iso/... → /media/nas
+    - /mnt/storage/iso/... → /mnt/storage
+    
+    Assumes NAS is mounted 2 levels deep (e.g., /media/nas or /mnt/disk).
+    If that fails, returns the parent of watch_dir.
+    """
+    watch_path = Path(watch_dir).resolve()
+    
+    # Try 2-level assumption first (/media/nas, /mnt/disk, etc.)
+    if len(watch_path.parts) >= 3:
+        candidate = Path(*watch_path.parts[:3])  # e.g., ('/', 'media', 'nas') → /media/nas
+        try:
+            if candidate.is_mount():
+                logger.info("Detected NAS mount: %s", candidate)
+                return str(candidate)
+        except (OSError, RuntimeError):
+            pass
+    
+    # Fallback: walk up until we find a mount point
+    current = watch_path
+    while str(current) != "/":
+        try:
+            if current.is_mount():
+                logger.info("Detected NAS mount (fallback): %s", current)
+                return str(current)
+        except (OSError, RuntimeError):
+            pass
+        current = current.parent
+    
+    # Last resort: assume /media/nas
+    logger.warning("Could not detect NAS mount, assuming /media/nas")
+    return "/media/nas"
 
 
 # ── Event handler ────────────────────────────────────────
@@ -202,8 +247,7 @@ def main():
 
     # Wait for NAS mount
     watch_dir = config.get("watch_dir")
-    nas_mount = str(Path(watch_dir).parts[1:3])  # Extract /media/nas from watch_dir
-    nas_mount = "/" + "/".join(Path(watch_dir).parts[1:3])
+    nas_mount = extract_nas_mount(watch_dir)
     
     if not wait_for_mount(nas_mount):
         logger.error("NAS mount point %s is unavailable. Giving up.", nas_mount)
