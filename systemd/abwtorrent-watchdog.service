@@ -1,6 +1,6 @@
 [Unit]
 Description=ABWTorrent ISO Watchdog
-Documentation=https://github.com/abw/abwtorrent
+Documentation=https://github.com/ademmoe/abwtorrent
 After=network-online.target transmission-daemon.service remote-fs.target
 Wants=network-online.target transmission-daemon.service
 
