@@ -111,33 +111,26 @@ def _path_to_mount_unit(path: str) -> str:
 
 def extract_nas_mount(watch_dir: str) -> str:
     """
-    Extract the NAS mount point from the watch directory path.
+    Find the actual mount point containing watch_dir by walking up the directory tree.
+    
+    Starts at watch_dir and walks up until finding a mount point.
+    Works with any directory structure.
     
     Examples:
-    - /media/nas/iso/... → /media/nas
-    - /mnt/storage/iso/... → /mnt/storage
-    
-    Assumes NAS is mounted 2 levels deep (e.g., /media/nas or /mnt/disk).
-    If that fails, walks up the tree to find an actual mount point.
+    - /media/nas/iso/... → walks up and finds /media/nas (if mounted)
+    - /mnt/storage/data/iso/... → walks up and finds /mnt/storage (if mounted)
     """
     watch_path = Path(watch_dir).resolve()
     
-    # Try 2-level assumption first (/media/nas, /mnt/disk, etc.)
-    if len(watch_path.parts) >= 3:
-        candidate = Path(*watch_path.parts[:3])  # e.g., ('/', 'media', 'nas') → /media/nas
-        if is_mount_point(str(candidate)):
-            logger.info("Detected NAS mount: %s", candidate)
-            return str(candidate)
-    
-    # Fallback: walk up until we find a mount point (but skip root)
+    # Walk UP from watch_dir until we find a mount point (but skip root)
     current = watch_path
     while str(current) != "/" and current.parent != current:
         if is_mount_point(str(current)):
-            logger.info("Detected NAS mount (fallback): %s", current)
+            logger.info("Detected NAS mount: %s", current)
             return str(current)
         current = current.parent
     
-    # Last resort: assume /media/nas
+    # Fallback (shouldn't reach here in normal operation)
     logger.warning("Could not detect NAS mount, assuming /media/nas")
     return "/media/nas"
 
