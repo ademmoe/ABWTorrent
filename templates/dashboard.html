@@ -3,11 +3,11 @@
 {% block body_class %}has-sidebar{% endblock %}
 
 {% block body %}
-<!-- Navbar for mobile -->
+<!-- Navbar -->
 <header>
-  <nav class="indigo top-nav hide-on-large-only">
+  <nav class="indigo top-nav">
     <div class="nav-wrapper">
-      <a href="#" data-target="slide-out" class="sidenav-trigger"><i class="material-icons">menu</i></a>
+      <a href="#" id="sidebar-toggle" data-target="slide-out" class="sidenav-trigger show-on-large" style="display: block;"><i class="material-icons">menu</i></a>
       <a href="#!" class="brand-logo">Dashboard</a>
     </div>
   </nav>
@@ -112,11 +112,5 @@
 {% endblock %}
 
 {% block scripts %}
-<script>
-  document.addEventListener('DOMContentLoaded', function() {
-    var elems = document.querySelectorAll('.sidenav');
-    M.Sidenav.init(elems);
-  });
-</script>
 <script src="{{ url_for('static', filename='js/app.js') }}"></script>
 {% endblock %}

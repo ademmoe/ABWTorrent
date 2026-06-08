@@ -20,13 +20,25 @@
       flex: 1 0 auto;
     }
     .brand-logo {
-      padding-left: 1rem !important;
+      padding-left: 3rem !important;
     }
     /* Dashboard specific layout */
     body.has-sidebar header, 
     body.has-sidebar main, 
     body.has-sidebar footer {
       padding-left: 300px;
+      transition: padding-left 0.3s ease;
+    }
+    body.has-sidebar.sidebar-collapsed header,
+    body.has-sidebar.sidebar-collapsed main,
+    body.has-sidebar.sidebar-collapsed footer {
+      padding-left: 0;
+    }
+    .sidenav-fixed {
+      transition: transform 0.3s ease;
+    }
+    .sidebar-collapsed .sidenav-fixed {
+      transform: translateX(-105%) !important;
     }
     @media only screen and (max-width : 992px) {
       body.has-sidebar header, 
