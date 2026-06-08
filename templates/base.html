@@ -23,28 +23,33 @@
       padding-left: 3rem !important;
     }
     /* Dashboard specific layout */
+    body.has-sidebar {
+      display: flex;
+      flex-direction: row;
+    }
+    body.has-sidebar .sidenav-fixed {
+      width: 300px;
+      flex-shrink: 0;
+      transition: all 0.3s ease;
+    }
+    body.has-sidebar.sidebar-collapsed .sidenav-fixed {
+      width: 0;
+      overflow: hidden;
+    }
     body.has-sidebar header, 
     body.has-sidebar main, 
     body.has-sidebar footer {
-      padding-left: 300px;
-      transition: padding-left 0.3s ease;
-    }
-    body.has-sidebar.sidebar-collapsed header,
-    body.has-sidebar.sidebar-collapsed main,
-    body.has-sidebar.sidebar-collapsed footer {
-      padding-left: 0;
-    }
-    .sidenav-fixed {
-      transition: transform 0.3s ease;
-    }
-    .sidebar-collapsed .sidenav-fixed {
-      transform: translateX(-105%) !important;
+      flex: 1;
+      transition: all 0.3s ease;
     }
     @media only screen and (max-width : 992px) {
       body.has-sidebar header, 
       body.has-sidebar main, 
       body.has-sidebar footer {
         padding-left: 0;
+      }
+      body.has-sidebar .sidenav-fixed {
+        display: none;
       }
     }
     .toast-success { background-color: #4caf50; }
@@ -56,6 +61,22 @@
   {% block body %}{% endblock %}
   <!-- Materialize JS -->
   <script src="{{ url_for('static', filename='js/materialize.min.js') }}"></script>
+  <script>
+    // Sidebar collapse toggle
+    document.addEventListener('DOMContentLoaded', function() {
+      const toggleBtn = document.getElementById('sidebar-toggle');
+      const body = document.body;
+      
+      if (toggleBtn) {
+        toggleBtn.addEventListener('click', function(e) {
+          e.preventDefault();
+          if (window.innerWidth > 992) {
+            body.classList.toggle('sidebar-collapsed');
+          }
+        });
+      }
+    });
+  </script>
   {% block scripts %}{% endblock %}
 </body>
 </html>
