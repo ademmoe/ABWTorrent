@@ -54,14 +54,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     listEl.innerHTML = filtered.map(f => `
-      <div class="collection-item avatar" style="display: flex; align-items: center; padding-left: 20px;">
-        <i class="material-icons circle indigo">insert_drive_file</i>
-        <div style="flex: 1; padding-left: 1rem;">
-          <span class="title" style="font-weight: 500;">${f.name}</span>
-          <p class="grey-text">${fmtBytes(f.size)}</p>
-        </div>
-        <a href="/download/${encodeURIComponent(f.name)}" class="btn waves-effect waves-light indigo" style="flex-shrink: 0;">
+      <div class="collection-item avatar" style="min-height: 84px; padding-left: 72px;">
+        <i class="material-icons circle indigo" style="position: absolute; width: 42px; height: 42px; overflow: hidden; left: 15px; display: inline-block; vertical-align: middle;">insert_drive_file</i>
+        <span class="title" style="font-weight: 500; display: block; margin-top: 10px;">${f.name}</span>
+        <p class="grey-text">${fmtBytes(f.size)}</p>
+        <a href="/download/${encodeURIComponent(f.name)}" class="secondary-content btn waves-effect waves-light indigo hide-on-small-only">
           <i class="material-icons left">file_download</i> Download
+        </a>
+        <a href="/download/${encodeURIComponent(f.name)}" class="secondary-content btn-floating waves-effect waves-light indigo hide-on-med-and-up">
+          <i class="material-icons">file_download</i>
         </a>
       </div>
     `).join('');
