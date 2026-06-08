@@ -26,22 +26,16 @@
     body.has-sidebar header, 
     body.has-sidebar main, 
     body.has-sidebar footer {
-      padding-left: 300px;
+      padding-left: 0;
       transition: padding-left 0.3s ease;
     }
-    body.has-sidebar.sidebar-collapsed header,
-    body.has-sidebar.sidebar-collapsed main,
-    body.has-sidebar.sidebar-collapsed footer {
-      padding-left: 0;
+    body.has-sidebar.sidebar-open header, 
+    body.has-sidebar.sidebar-open main, 
+    body.has-sidebar.sidebar-open footer {
+      padding-left: 300px;
     }
     .sidenav-fixed {
       transition: transform 0.3s ease;
-    }
-    body.has-sidebar .sidenav-fixed {
-      transform: translateX(0) !important;
-    }
-    body.has-sidebar.sidebar-collapsed .sidenav-fixed {
-      transform: translateX(-105%) !important;
     }
     @media only screen and (max-width : 992px) {
       body.has-sidebar header, 
