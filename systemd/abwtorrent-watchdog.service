@@ -1,9 +1,8 @@
 [Unit]
 Description=ABWTorrent ISO Watchdog
 Documentation=https://github.com/abw/abwtorrent
-After=network-online.target transmission-daemon.service remote-fs.target media-nas.mount
-Wants=network-online.target
-Requires=transmission-daemon.service media-nas.mount
+After=network-online.target transmission-daemon.service remote-fs.target
+Wants=network-online.target transmission-daemon.service
 
 [Service]
 Type=simple
