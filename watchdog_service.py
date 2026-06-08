@@ -188,7 +188,7 @@ def initial_scan(config: Config, gen: TorrentGenerator, tc: TransmissionClient):
     """Process every existing ISO on startup."""
     watch_dir = config.get("watch_dir")
     logger.info("Initial scan of %s", watch_dir)
-    for iso in sorted(Path(watch_dir).glob("*.iso")):
+    for iso in sorted(Path(watch_dir).rglob("*.iso")):
         fp = TorrentGenerator.file_fingerprint(str(iso))
         out_dir = config.get("torrent_output_dir")
         torrent_file = Path(out_dir) / (iso.stem + ".torrent")
@@ -269,7 +269,7 @@ def main():
     # Start filesystem observer (PollingObserver for NAS/NFS/CIFS reliability)
     handler = ISOHandler(config, gen, tc)
     observer = PollingObserver(timeout=10)
-    observer.schedule(handler, watch_dir, recursive=False)
+    observer.schedule(handler, watch_dir, recursive=True)
     observer.start()
     logger.info("Watching for ISO changes…")
 
