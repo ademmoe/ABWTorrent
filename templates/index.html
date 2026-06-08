@@ -2,16 +2,7 @@
 {% block title %}Torrents — ABWTorrent{% endblock %}
 
 {% block body %}
-<nav class="indigo">
-  <div class="nav-wrapper container">
-    <a href="#" class="brand-logo"><i class="material-icons">cloud_download</i> ABWTorrent</a>
-    <ul id="nav-mobile" class="right hide-on-med-and-down">
-      <li><a href="{{ url_for('dashboard') }}">Admin Login</a></li>
-    </ul>
-  </div>
-</nav>
-
-<main class="container" style="padding-top: 2rem;">
+<div class="container" style="padding-top: 2rem;">
   <div class="row">
     <div class="col s12">
       <h4 class="center-align" style="margin-bottom: 2rem;">Available Torrents</h4>
@@ -26,7 +17,7 @@
       </div>
     </div>
   </div>
-</main>
+</div>
 {% endblock %}
 
 {% block scripts %}
