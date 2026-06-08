@@ -6,6 +6,7 @@ import logging
 import logging.handlers
 import os
 import signal
+import subprocess
 import sys
 import time
 import threading
@@ -22,6 +23,116 @@ from lib.torrent_gen import TorrentGenerator
 from lib.transmission_api import TransmissionClient
 
 logger = logging.getLogger("abwtorrent")
+
+
+# ── Mount verification ───────────────────────────────────
+
+def is_mount_point(path: str) -> bool:
+    """
+    Check if a path is an actual mount point by reading /proc/mounts.
+    More reliable than Path.is_mount() for NAS mounts.
+    """
+    path_str = str(Path(path).resolve())
+    try:
+        with open("/proc/mounts", "r") as f:
+            for line in f:
+                parts = line.split()
+                if len(parts) >= 2:
+                    mount_point = parts[1]
+                    if mount_point == path_str:
+                        return True
+    except (OSError, IOError):
+        pass
+    return False
+
+
+def wait_for_mount(mountpoint: str, max_wait: int = 300, check_interval: int = 5) -> bool:
+    """
+    Wait for the NAS to be mounted at the specified mountpoint.
+    
+    If the mount doesn't exist after initial check, attempt to mount it via systemctl.
+    Returns True if mount is successful, False if timeout.
+    """
+    mountpoint = str(Path(mountpoint).resolve())
+    logger.info("Waiting for mount at %s (timeout: %ds)…", mountpoint, max_wait)
+    
+    elapsed = 0
+    first_check = True
+    
+    while elapsed < max_wait:
+        # Check if already mounted
+        if is_mount_point(mountpoint):
+            logger.info("✓ Mount point %s is ready", mountpoint)
+            return True
+        
+        # On first iteration, try to mount via systemctl if not already mounted
+        if first_check:
+            first_check = False
+            mount_unit = _path_to_mount_unit(mountpoint)
+            if mount_unit:
+                logger.info("Attempting to mount via systemctl start %s", mount_unit)
+                try:
+                    result = subprocess.run(
+                        ["systemctl", "start", mount_unit],
+                        capture_output=True,
+                        timeout=30
+                    )
+                    if result.returncode == 0:
+                        logger.info("Systemctl mount command succeeded")
+                        time.sleep(2)  # Give mount time to settle
+                        if is_mount_point(mountpoint):
+                            logger.info("✓ Mount point %s is ready", mountpoint)
+                            return True
+                    else:
+                        stderr = result.stderr.decode(errors="ignore").strip()
+                        logger.warning("Systemctl mount failed: %s", stderr if stderr else "(no error output)")
+                except (subprocess.TimeoutExpired, FileNotFoundError) as exc:
+                    logger.warning("Could not invoke systemctl: %s", exc)
+        
+        # Wait and retry
+        logger.debug("Mount check failed, retrying in %ds… (elapsed: %ds/%ds)",
+                    check_interval, elapsed, max_wait)
+        time.sleep(check_interval)
+        elapsed += check_interval
+    
+    logger.error("✗ Mount point %s did not become available within %ds", mountpoint, max_wait)
+    return False
+
+
+def _path_to_mount_unit(path: str) -> str:
+    """Convert a filesystem path to a systemd mount unit name."""
+    # e.g., /media/nas → media-nas.mount
+    path = str(path).strip("/")
+    if not path:
+        return None
+    unit = path.replace("/", "-")
+    return f"{unit}.mount"
+
+
+def extract_nas_mount(watch_dir: str) -> str:
+    """
+    Find the actual mount point containing watch_dir by walking up the directory tree.
+    
+    Starts at watch_dir and walks up until finding a mount point.
+    Works with any directory structure.
+    
+    Examples:
+    - /media/nas/iso/... → walks up and finds /media/nas (if mounted)
+    - /mnt/storage/data/iso/... → walks up and finds /mnt/storage (if mounted)
+    """
+    watch_path = Path(watch_dir).resolve()
+    
+    # Walk UP from watch_dir until we find a mount point (but skip root)
+    current = watch_path
+    while str(current) != "/" and current.parent != current:
+        if is_mount_point(str(current)):
+            logger.info("Detected NAS mount: %s", current)
+            return str(current)
+        current = current.parent
+    
+    # Fallback (shouldn't reach here in normal operation)
+    logger.warning("Could not detect NAS mount, assuming /media/nas")
+    return "/media/nas"
 
 
 # ── Event handler ────────────────────────────────────────
@@ -137,8 +248,17 @@ def main():
     gen = TorrentGenerator(config)
     tc  = TransmissionClient(config)
 
-    # Make sure watch directory exists
+    # Wait for NAS mount (read timeout from config)
     watch_dir = config.get("watch_dir")
+    nas_mount = extract_nas_mount(watch_dir)
+    max_wait = config.get("mount.max_wait_seconds", 300)
+    check_interval = config.get("mount.check_interval_seconds", 5)
+    
+    if not wait_for_mount(nas_mount, max_wait=max_wait, check_interval=check_interval):
+        logger.error("NAS mount point %s is unavailable. Giving up.", nas_mount)
+        sys.exit(1)
+
+    # Make sure watch directory exists
     if not Path(watch_dir).is_dir():
         logger.error("Watch directory does not exist: %s", watch_dir)
         sys.exit(1)

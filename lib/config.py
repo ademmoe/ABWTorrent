@@ -25,6 +25,10 @@ DEFAULT_CONFIG = {
         "check_interval": 2,
         "stable_count": 3,
     },
+    "mount": {
+        "max_wait_seconds": 300,
+        "check_interval_seconds": 5,
+    },
     "web": {
         "host": "0.0.0.0",
         "port": 8080,
