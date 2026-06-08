@@ -54,11 +54,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     listEl.innerHTML = filtered.map(f => `
-      <div class="collection-item avatar" style="display: flex; align-items: center; padding-left: 20px;">
-        <i class="material-icons circle indigo">insert_drive_file</i>
-        <div style="flex: 1; padding-left: 1rem;">
-          <span class="title" style="font-weight: 500;">${f.name}</span>
-          <p class="grey-text">${fmtBytes(f.size)}</p>
+      <div class="collection-item avatar" style="display: flex; align-items: center; padding-left: 20px; gap: 1rem;">
+        <i class="material-icons circle indigo" style="flex-shrink: 0;">insert_drive_file</i>
+        <div style="flex: 1; min-width: 0;">
+          <span class="title" style="font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: block;">${f.name}</span>
+          <p class="grey-text" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin: 0.25rem 0;">${fmtBytes(f.size)}</p>
         </div>
         <a href="/download/${encodeURIComponent(f.name)}" class="btn waves-effect waves-light indigo" style="flex-shrink: 0;">
           <i class="material-icons left">file_download</i> Download
