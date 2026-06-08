@@ -140,4 +140,20 @@
 
   refresh();
   setInterval(refresh, REFRESH_INTERVAL);
+
+  // ── Sidebar Toggle Initialization ─────────────
+  document.addEventListener('DOMContentLoaded', function() {
+    var elems = document.querySelectorAll('.sidenav');
+    M.Sidenav.init(elems);
+    var toggleBtn = document.getElementById('sidebar-toggle');
+    if (toggleBtn) {
+      toggleBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        if (window.innerWidth > 992) {
+          document.body.classList.toggle('sidebar-collapsed');
+        }
+      });
+    }
+  });
+
 })();

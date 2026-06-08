@@ -7,8 +7,8 @@ Requires=transmission-daemon.service
 
 [Service]
 Type=simple
-User=debian-transmission
-Group=debian-transmission
+User=root
+Group=root
 ExecStart=/opt/abwtorrent/venv/bin/python3 /opt/abwtorrent/watchdog_service.py --config /etc/abwtorrent/abwtorrent.conf
 Restart=on-failure
 RestartSec=10
