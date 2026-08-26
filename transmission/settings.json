@@ -9,7 +9,7 @@
     "bind-address-ipv4": "0.0.0.0",
     "bind-address-ipv6": "::",
     "blocklist-enabled": false,
-    "cache-size-mb": 4,
+    "cache-size-mb": 256,
     "dht-enabled": false,
     "download-dir": "/media/nas/iso/operating_systems/Linux/Debian",
     "download-queue-enabled": false,
@@ -22,8 +22,8 @@
     "message-level": 2,
     "peer-congestion-algorithm": "",
     "peer-id-ttl-hours": 6,
-    "peer-limit-global": 200,
-    "peer-limit-per-torrent": 50,
+    "peer-limit-global": 1000,
+    "peer-limit-per-torrent": 250,
     "peer-port": 51413,
     "peer-port-random-high": 65535,
     "peer-port-random-low": 49152,
@@ -59,6 +59,6 @@
     "start-added-torrents": false,
     "trash-original-torrent-files": false,
     "umask": 18,
-    "upload-slots-per-torrent": 14,
-    "utp-enabled": true
+    "upload-slots-per-torrent": 50,
+    "utp-enabled": false
 }
