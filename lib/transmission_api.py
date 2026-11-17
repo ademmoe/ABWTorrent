@@ -32,11 +32,14 @@ class TransmissionClient:
     def client(self) -> transmission_rpc.Client:
         if self._client is None:
             return self._connect()
-        try:
-            self._client.session_stats()
-        except Exception:
-            return self._connect()
         return self._client
+
+    def _call(self, fn):
+        """Execute a Transmission RPC call, reconnecting once if the session expired."""
+        try:
+            return fn(self.client)
+        except Exception:
+            return fn(self._connect())
 
     # ── Torrent injection ────────────────────────────────
 
@@ -57,17 +60,17 @@ class TransmissionClient:
             logger.info("  Added ID %d — verifying data…", torrent.id)
 
             self.client.verify_torrent(torrent.id)
-            time.sleep(2)
+            time.sleep(0.5)
 
             # Wait for hash-check to finish (up to 10 min)
             deadline = time.time() + 600
             while time.time() < deadline:
-                t = self.client.get_torrent(torrent.id)
+                t = self.client.get_torrent(torrent.id, arguments=["id", "status", "percentDone"])
                 status = str(t.status).lower()
                 if "check" not in status:
                     break
                 logger.debug("  Verify %.1f%%", t.percent_done * 100)
-                time.sleep(5)
+                time.sleep(1)
 
             self.client.start_torrent(torrent.id)
             logger.info("  Seeding started: %s (ID %d)", name, torrent.id)
@@ -87,8 +90,15 @@ class TransmissionClient:
 
     # ── Dashboard queries ────────────────────────────────
 
+    _TORRENT_FIELDS = [
+        "id", "name", "status", "percentDone", "totalSize",
+        "uploadedEver", "uploadRatio", "rateUpload", "rateDownload",
+        "peersConnected", "addedDate", "downloadDir",
+    ]
+
     def get_all_torrents(self) -> List[Dict[str, Any]]:
         try:
+            torrents = self._call(lambda c: c.get_torrents(arguments=self._TORRENT_FIELDS))
             return [
                 {
                     "id": t.id,
@@ -104,15 +114,33 @@ class TransmissionClient:
                     "added": str(getattr(t, 'date_added', getattr(t, 'addedDate', ''))),
                     "download_dir": getattr(t, 'download_dir', getattr(t, 'downloadDir', '')),
                 }
-                for t in self.client.get_torrents()
+                for t in torrents
             ]
         except Exception as exc:
             logger.error("get_all_torrents: %s", exc)
             return []
 
+    def get_torrents_info(self, tids: List[int]) -> List[Dict[str, Any]]:
+        """Fetch minimal name/download_dir metadata for specific torrent IDs."""
+        if not tids:
+            return []
+        try:
+            torrents = self._call(lambda c: c.get_torrents(ids=tids, arguments=["id", "name", "downloadDir"]))
+            return [
+                {
+                    "id": t.id,
+                    "name": t.name,
+                    "download_dir": getattr(t, 'download_dir', getattr(t, 'downloadDir', '')),
+                }
+                for t in torrents
+            ]
+        except Exception as exc:
+            logger.error("get_torrents_info: %s", exc)
+            return []
+
     def get_session_stats(self) -> Dict[str, Any]:
         try:
-            s = self.client.session_stats()
+            s = self._call(lambda c: c.session_stats())
             return {
                 "active": getattr(s, 'active_torrent_count', getattr(s, 'activeTorrentCount', 0)),
                 "paused": getattr(s, 'paused_torrent_count', getattr(s, 'pausedTorrentCount', 0)),
@@ -127,10 +155,22 @@ class TransmissionClient:
     # ── Torrent actions ──────────────────────────────────
 
     def remove_torrent(self, tid: int, delete_data: bool = False):
-        self.client.remove_torrent(tid, delete_data=delete_data)
+        self._call(lambda c: c.remove_torrent(tid, delete_data=delete_data))
+
+    def remove_torrents(self, tids: List[int], delete_data: bool = False):
+        if tids:
+            self._call(lambda c: c.remove_torrent(tids, delete_data=delete_data))
 
     def pause_torrent(self, tid: int):
-        self.client.stop_torrent(tid)
+        self._call(lambda c: c.stop_torrent(tid))
+
+    def pause_torrents(self, tids: List[int]):
+        if tids:
+            self._call(lambda c: c.stop_torrent(tids))
 
     def resume_torrent(self, tid: int):
-        self.client.start_torrent(tid)
+        self._call(lambda c: c.start_torrent(tid))
+
+    def resume_torrents(self, tids: List[int]):
+        if tids:
+            self._call(lambda c: c.start_torrent(tids))

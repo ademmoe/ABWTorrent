@@ -48,11 +48,36 @@
 <!-- Torrents Table -->
 <div class="card">
   <div class="card-content">
-    <span class="card-title">Seeding Torrents <span class="new badge indigo" data-badge-caption="" id="torrent-count-badge">0</span></span>
+    <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.75rem; margin-bottom: 1rem;">
+      <span class="card-title" style="margin-bottom: 0;">Seeding Torrents <span class="new badge indigo" data-badge-caption="" id="torrent-count-badge">0</span></span>
+      <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem;">
+        <button type="button" id="btn-select-all" class="btn-small waves-effect waves-light indigo lighten-1">
+          <i class="material-icons left">select_all</i><span>Select All</span>
+        </button>
+        <div id="bulk-actions" style="display: none; align-items: center; gap: 0.5rem;">
+          <span id="selected-count-label" class="grey-text" style="font-size: 0.9rem; margin: 0 0.25rem;">0 selected</span>
+          <button type="button" id="btn-bulk-resume" class="btn-small waves-effect waves-light green">
+            <i class="material-icons left">play_arrow</i>Resume
+          </button>
+          <button type="button" id="btn-bulk-pause" class="btn-small waves-effect waves-light orange">
+            <i class="material-icons left">pause</i>Pause
+          </button>
+          <button type="button" id="btn-bulk-remove" class="btn-small waves-effect waves-light red">
+            <i class="material-icons left">delete</i>Remove
+          </button>
+        </div>
+      </div>
+    </div>
     <div style="overflow-x: auto;">
       <table class="highlight responsive-table" id="torrents-table">
         <thead>
           <tr>
+            <th style="width: 40px;">
+              <label>
+                <input type="checkbox" id="select-all-checkbox" class="filled-in" />
+                <span></span>
+              </label>
+            </th>
             <th>Name</th>
             <th>Status</th>
             <th>Progress</th>
@@ -65,10 +90,27 @@
           </tr>
         </thead>
         <tbody id="torrents-tbody">
-          <tr><td colspan="9" class="center-align grey-text" style="padding: 3rem;">Loading…</td></tr>
+          <tr><td colspan="10" class="center-align grey-text" style="padding: 3rem;">Loading…</td></tr>
         </tbody>
       </table>
     </div>
+  </div>
+</div>
+
+<!-- Remove Confirmation Modal -->
+<div id="remove-modal" class="modal">
+  <div class="modal-content">
+    <h5 id="remove-modal-title">Remove Torrent</h5>
+    <p id="remove-modal-desc">Choose how you would like to remove the selected torrent(s):</p>
+    <p class="grey-text" style="font-size: 0.9rem;">
+      <strong>Remove .torrent only:</strong> Stops seeding, removes from Transmission, and deletes the <code>.torrent</code> file. The underlying <code>.iso</code> file stays on disk.<br>
+      <strong>Remove .torrent &amp; .iso:</strong> Stops seeding, removes from Transmission, and permanently deletes both the <code>.torrent</code> file and the underlying <code>.iso</code> file.
+    </p>
+  </div>
+  <div class="modal-footer">
+    <a href="#!" class="modal-close btn-flat waves-effect">Cancel</a>
+    <button type="button" id="modal-remove-torrent-only" class="btn waves-effect waves-light orange">Remove .torrent only</button>
+    <button type="button" id="modal-remove-with-iso" class="btn waves-effect waves-light red">Remove .torrent &amp; .iso</button>
   </div>
 </div>
 {% endblock %}

@@ -45,6 +45,8 @@ cp "$SRC_DIR/requirements.txt"    "$INSTALL_DIR/"
 cp -r "$SRC_DIR/lib"              "$INSTALL_DIR/"
 cp -r "$SRC_DIR/templates"        "$INSTALL_DIR/"
 cp -r "$SRC_DIR/static"           "$INSTALL_DIR/"
+cp -r "$SRC_DIR/scripts"          "$INSTALL_DIR/"
+chmod +x "$INSTALL_DIR/scripts/"*.sh
 
 # ── 5. Install Python venv + deps ───────────────
 echo "> Setting up Python virtual environment..."
@@ -104,6 +106,26 @@ ufw allow from "$LAN_SUBNET" to any port 8080 proto tcp comment "ABWTorrent Web 
 
 # Enable UFW if not already active
 ufw --force enable 2>/dev/null || true
+
+# ── 10b. LAN TCP/network performance tuning ─────
+echo "> Applying LAN TCP/network sysctl tuning..."
+modprobe tcp_bbr 2>/dev/null || true
+cat > /etc/sysctl.d/99-abwtorrent.conf <<'SYSCTL'
+# ABWTorrent — LAN high-throughput TCP tuning
+net.core.rmem_max = 16777216
+net.core.wmem_max = 16777216
+net.ipv4.tcp_rmem = 4096 87380 16777216
+net.ipv4.tcp_wmem = 4096 65536 16777216
+net.core.netdev_max_backlog = 16384
+net.ipv4.tcp_slow_start_after_idle = 0
+SYSCTL
+if sysctl -n net.ipv4.tcp_available_congestion_control 2>/dev/null | grep -qw bbr; then
+    cat >> /etc/sysctl.d/99-abwtorrent.conf <<'SYSCTL_BBR'
+net.core.default_qdisc = fq
+net.ipv4.tcp_congestion_control = bbr
+SYSCTL_BBR
+fi
+sysctl --system >/dev/null 2>&1 || true
 
 # ── 11. Enable & start services ─────────────────
 echo "> Enabling and starting services..."

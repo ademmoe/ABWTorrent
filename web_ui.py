@@ -118,11 +118,71 @@ def api_resume(tid):
     return jsonify({"ok": True})
 
 
+def _delete_torrent_files(torrents_info, delete_iso: bool = False):
+    """Remove .torrent file(s) from torrent_output_dir and optionally the underlying .iso file."""
+    torrent_dir = config.get("torrent_output_dir")
+    for info in torrents_info:
+        name = info.get("name", "")
+        if not name:
+            continue
+
+        if torrent_dir:
+            out_dir = Path(torrent_dir)
+            for candidate in (out_dir / f"{Path(name).stem}.torrent", out_dir / f"{name}.torrent"):
+                if candidate.is_file():
+                    try:
+                        candidate.unlink()
+                    except OSError:
+                        pass
+
+        if delete_iso:
+            dl_dir = info.get("download_dir", "")
+            if dl_dir:
+                iso_path = Path(dl_dir) / name
+                if iso_path.is_file():
+                    try:
+                        iso_path.unlink()
+                    except OSError:
+                        pass
+
+
+def _remove_torrents_and_files(tids, delete_data: bool = False):
+    """Remove torrents from Transmission, delete their .torrent files, and optionally delete .iso data."""
+    torrents_info = tc.get_torrents_info(tids)
+    tc.remove_torrents(tids, delete_data=delete_data)
+    _delete_torrent_files(torrents_info, delete_iso=delete_data)
+
+
 @app.route("/api/torrent/<int:tid>/remove", methods=["POST"])
 @login_required
 def api_remove(tid):
-    tc.remove_torrent(tid, delete_data=False)
+    data = request.get_json(silent=True) or {}
+    delete_data = bool(data.get("delete_data", False))
+    _remove_torrents_and_files([tid], delete_data=delete_data)
     return jsonify({"ok": True})
+
+
+@app.route("/api/torrents/bulk", methods=["POST"])
+@login_required
+def api_torrents_bulk():
+    data = request.get_json(silent=True) or {}
+    ids = [int(i) for i in data.get("ids", []) if str(i).isdigit()]
+    action = data.get("action", "")
+    delete_data = bool(data.get("delete_data", False))
+
+    if not ids:
+        return jsonify({"ok": False, "message": "No torrents selected."}), 400
+
+    if action == "pause":
+        tc.pause_torrents(ids)
+    elif action == "resume":
+        tc.resume_torrents(ids)
+    elif action == "remove":
+        _remove_torrents_and_files(ids, delete_data=delete_data)
+    else:
+        return jsonify({"ok": False, "message": "Invalid action."}), 400
+
+    return jsonify({"ok": True, "count": len(ids)})
 
 
 @app.route("/api/settings", methods=["POST"])
@@ -268,4 +328,4 @@ if __name__ == "__main__":
     port = args.port or config.get("web.port", 8080)
 
     print(f"ABWTorrent Web UI → http://{host}:{port}")
-    app.run(host=host, port=port, debug=False)
+    app.run(host=host, port=port, debug=False, threaded=True)
