@@ -6,8 +6,8 @@ Wants=network-online.target
 
 [Service]
 Type=simple
-User=debian-transmission
-Group=debian-transmission
+User=root
+Group=root
 Environment=ABWTORRENT_CONFIG=/etc/abwtorrent/abwtorrent.conf
 ExecStart=/opt/abwtorrent/venv/bin/python3 /opt/abwtorrent/web_ui.py --config /etc/abwtorrent/abwtorrent.conf
 Restart=on-failure

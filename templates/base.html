@@ -66,6 +66,7 @@
 
         {% if session.get('user') %}
         <ul class="right hide-on-med-and-down" style="margin: 0; display: flex;">
+          <li><a href="{{ url_for('index') }}" class="waves-effect"><i class="material-icons left">public</i>Client Page</a></li>
           <li><a href="{{ url_for('dashboard') }}" class="waves-effect"><i class="material-icons left">dashboard</i>Dashboard</a></li>
           <li><a href="{{ url_for('settings') }}" class="waves-effect"><i class="material-icons left">settings</i>Settings</a></li>
           <li><a href="{{ url_for('logout') }}" class="waves-effect"><i class="material-icons left">exit_to_app</i>Sign out</a></li>
@@ -88,7 +89,7 @@
   <!-- Footer with Credits -->
   <footer>
     <div>
-      <strong>ABWTorrent</strong> - Developed by Adem Karagöz | Credits: Dominic Naumann, Sönke Einnolf
+      <strong>ABWTorrent</strong> Version {{ app_version | default('2.0.1') }} - Developed by Adem Karagöz | Credits: Dominic Naumann, Sönke Einnolf
     </div>
   </footer>
 

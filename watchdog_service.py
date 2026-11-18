@@ -154,6 +154,11 @@ class ISOHandler(FileSystemEventHandler):
         if not event.is_directory and event.src_path.lower().endswith(".iso"):
             self._process(event.src_path, "modified")
 
+    def on_deleted(self, event):
+        if not event.is_directory and event.src_path.lower().endswith(".iso"):
+            with self._lock:
+                self._fingerprints.pop(event.src_path, None)
+
     def _process(self, path: str, reason: str):
         with self._lock:
             if not Path(path).exists():

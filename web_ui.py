@@ -18,6 +18,7 @@ from lib.transmission_api import TransmissionClient
 
 # ── Globals ──────────────────────────────────────────────
 
+APP_VERSION = "2.0.1"
 CONFIG_PATH = os.environ.get("ABWTORRENT_CONFIG", "/etc/abwtorrent/abwtorrent.conf")
 config = Config(CONFIG_PATH)
 tc = TransmissionClient(config)
@@ -55,6 +56,7 @@ def _fmt_bytes(n):
 
 
 app.jinja_env.globals["fmt_bytes"] = _fmt_bytes
+app.jinja_env.globals["app_version"] = APP_VERSION
 
 
 # ── Routes ───────────────────────────────────────────────
@@ -121,6 +123,9 @@ def api_resume(tid):
 def _delete_torrent_files(torrents_info, delete_iso: bool = False):
     """Remove .torrent file(s) from torrent_output_dir and optionally the underlying .iso file."""
     torrent_dir = config.get("torrent_output_dir")
+    watch_dir = config.get("watch_dir")
+    errors = []
+
     for info in torrents_info:
         name = info.get("name", "")
         if not name:
@@ -132,25 +137,38 @@ def _delete_torrent_files(torrents_info, delete_iso: bool = False):
                 if candidate.is_file():
                     try:
                         candidate.unlink()
-                    except OSError:
-                        pass
+                    except OSError as exc:
+                        errors.append(f"Failed to delete {candidate}: {exc}")
 
         if delete_iso:
+            deleted_iso = False
             dl_dir = info.get("download_dir", "")
             if dl_dir:
                 iso_path = Path(dl_dir) / name
                 if iso_path.is_file():
                     try:
                         iso_path.unlink()
-                    except OSError:
-                        pass
+                        deleted_iso = True
+                    except OSError as exc:
+                        errors.append(f"Failed to delete {iso_path}: {exc}")
+
+            if not deleted_iso and watch_dir and Path(watch_dir).is_dir():
+                for iso_path in Path(watch_dir).rglob(name):
+                    if iso_path.is_file():
+                        try:
+                            iso_path.unlink()
+                            deleted_iso = True
+                        except OSError as exc:
+                            errors.append(f"Failed to delete {iso_path}: {exc}")
+
+    return errors
 
 
 def _remove_torrents_and_files(tids, delete_data: bool = False):
     """Remove torrents from Transmission, delete their .torrent files, and optionally delete .iso data."""
     torrents_info = tc.get_torrents_info(tids)
     tc.remove_torrents(tids, delete_data=delete_data)
-    _delete_torrent_files(torrents_info, delete_iso=delete_data)
+    return _delete_torrent_files(torrents_info, delete_iso=delete_data)
 
 
 @app.route("/api/torrent/<int:tid>/remove", methods=["POST"])
@@ -158,7 +176,12 @@ def _remove_torrents_and_files(tids, delete_data: bool = False):
 def api_remove(tid):
     data = request.get_json(silent=True) or {}
     delete_data = bool(data.get("delete_data", False))
-    _remove_torrents_and_files([tid], delete_data=delete_data)
+    try:
+        errors = _remove_torrents_and_files([tid], delete_data=delete_data)
+    except Exception as exc:
+        return jsonify({"ok": False, "message": f"Failed to remove torrent: {exc}"}), 500
+    if errors:
+        return jsonify({"ok": False, "message": "; ".join(errors)}), 500
     return jsonify({"ok": True})
 
 
@@ -173,14 +196,19 @@ def api_torrents_bulk():
     if not ids:
         return jsonify({"ok": False, "message": "No torrents selected."}), 400
 
-    if action == "pause":
-        tc.pause_torrents(ids)
-    elif action == "resume":
-        tc.resume_torrents(ids)
-    elif action == "remove":
-        _remove_torrents_and_files(ids, delete_data=delete_data)
-    else:
-        return jsonify({"ok": False, "message": "Invalid action."}), 400
+    try:
+        if action == "pause":
+            tc.pause_torrents(ids)
+        elif action == "resume":
+            tc.resume_torrents(ids)
+        elif action == "remove":
+            errors = _remove_torrents_and_files(ids, delete_data=delete_data)
+            if errors:
+                return jsonify({"ok": False, "message": "; ".join(errors)}), 500
+        else:
+            return jsonify({"ok": False, "message": "Invalid action."}), 400
+    except Exception as exc:
+        return jsonify({"ok": False, "message": f"Bulk action failed: {exc}"}), 500
 
     return jsonify({"ok": True, "count": len(ids)})
 
@@ -214,7 +242,10 @@ def api_save_settings():
 
     if needs_restart:
         try:
-            subprocess.run(["sudo", "systemctl", "restart", "abwtorrent-watchdog"], capture_output=True, check=True)
+            cmd = ["systemctl", "restart", "abwtorrent-watchdog"]
+            if os.geteuid() != 0:
+                cmd.insert(0, "sudo")
+            subprocess.run(cmd, capture_output=True, check=True)
         except subprocess.CalledProcessError as e:
             print(f"Failed to restart watchdog: {e}")
 

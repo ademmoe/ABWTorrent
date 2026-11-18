@@ -59,14 +59,22 @@ document.addEventListener('DOMContentLoaded', async () => {
     `).join('');
   }
 
-  try {
-    const res = await fetch('/api/torrent-files');
-    const j = await res.json();
-    filesData = j.files || [];
-    renderList();
-  } catch (e) {
-    listEl.innerHTML = '<div class="collection-item center-align red-text">Failed to load torrents.</div>';
+  async function loadTorrents() {
+    try {
+      const res = await fetch('/api/torrent-files', { cache: 'no-store' });
+      const j = await res.json();
+      filesData = j.files || [];
+      renderList(searchInput.value);
+    } catch (e) {
+      listEl.innerHTML = '<div class="collection-item center-align red-text">Failed to load torrents.</div>';
+    }
   }
+
+  await loadTorrents();
+  setInterval(loadTorrents, 5000);
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) loadTorrents();
+  });
 
   searchInput.addEventListener('input', (e) => {
     renderList(e.target.value);
