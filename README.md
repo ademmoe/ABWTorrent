@@ -81,6 +81,29 @@ The installer will:
 
 ---
 
+## Update
+
+```bash
+# 1. Clone the Update Script to the Server
+curl -fsSL https://raw.githubusercontent.com/ademmoe/ABWTorrent/main/scripts/update.sh | sudo bash
+
+# 2. Make it executable
+sudo chmod +x ./update.sh
+
+# 3. Run the update script
+sudo bash ./update.sh
+```
+
+The update script will: 
+1. Download and Verifies the latest Release
+2. Stops running services
+3. Updates application files
+4. Preserves Configuration & Merges Settings
+5. Updates Systemd Units & Network Tuning
+6. Restores Permissions & Restarts Services
+
+Please make sure to have a functional Backup before attempting to update the ABWTorrent-Service
+
 ## Access Points
 
 ### ABWTorrent Dashboard (custom Web UI)
